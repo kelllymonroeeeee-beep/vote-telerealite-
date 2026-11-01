@@ -2,344 +2,187 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Star Academy - Cote de popularité</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Star Academy - Votes</title>
+  <style>
+    * { box-sizing: border-box; }
 
-<style>
-* {
-  box-sizing: border-box;
-}
+    body {
+      margin: 0;
+      padding: 20px;
+      background: #000;
+      color: white;
+      font-family: Arial, sans-serif;
+    }
 
-body {
-  margin: 0;
-  padding: 20px 14px;
-  font-family: Arial, sans-serif;
-  background: #000000;
-  color: #ffffff;
-}
+    h1, h2 { text-align: center; }
+    h1 { margin-bottom: 30px; }
+    h2 { font-size: 22px; margin-bottom: 25px; }
 
-header {
-  text-align: center;
-  padding: 15px 5px 25px;
-}
+    .candidat {
+      max-width: 500px;
+      margin: 14px auto;
+      padding: 16px;
+      background: #191919;
+      border-radius: 12px;
+    }
 
-h1 {
-  margin: 0;
-  color: #ffffff;
-  font-size: 27px;
-}
+    .nom {
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
 
-.subtitle {
-  color: #bbbbbb;
-  margin-top: 9px;
-  font-size: 14px;
-}
+    .statut {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: bold;
+      padding: 6px 10px;
+      border-radius: 20px;
+      margin-bottom: 12px;
+    }
 
-.candidates {
-  max-width: 650px;
-  margin: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 13px;
-}
+    .jaune { background: #ffd900; color: #000; }
+    .bleu { background: #38bdf8; color: #001522; }
+    .rouge { background: #e53935; color: white; }
+    .noir { background: #000; color: white; border: 1px solid #777; }
 
-.candidate {
-  background: #171717;
-  color: white;
-  border: 1px solid #303030;
-  border-radius: 15px;
-  padding: 14px;
-  display: flex;
-  align-items: center;
-  gap: 13px;
-}
+    button {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-bottom: 12px;
+    }
 
-.rank {
-  width: 36px;
-  height: 36px;
-  flex-shrink: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  border-radius: 50%;
-  background: #333333;
-  color: white;
-  font-weight: bold;
-  font-size: 15px;
-}
+    button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
 
-.info {
-  flex: 1;
-  min-width: 0;
-}
+    .barre {
+      height: 12px;
+      background: #444;
+      border-radius: 20px;
+      overflow: hidden;
+    }
 
-.name {
-  font-weight: 800;
-  font-size: 16px;
-  margin-bottom: 8px;
-}
+    .progression {
+      height: 100%;
+      width: 0%;
+      background: #38bdf8;
+      transition: width 0.3s;
+    }
 
-.status {
-  display: inline-block;
-  font-size: 11px;
-  font-weight: 800;
-  padding: 5px 9px;
-  border-radius: 20px;
-}
+    .compteur {
+      text-align: right;
+      font-size: 12px;
+      color: #ccc;
+      margin-top: 5px;
+    }
 
-.status.immunise {
-  background: #fff0a8;
-  color: #9b7100;
-}
-
-.status.competition {
-  background: #d9f2ff;
-  color: #1685bd;
-}
-
-.status.elimine {
-  background: #ffe0e0;
-  color: #d32323;
-}
-
-.status.abandon {
-  background: #292929;
-  color: white;
-  border: 1px solid #777777;
-}
-
-.vote-button {
-  border: 0;
-  border-radius: 22px;
-  padding: 11px 15px;
-  min-width: 90px;
-  font-size: 13px;
-  font-weight: 900;
-  cursor: pointer;
-}
-
-.vote-button.yellow {
-  background: #f2c500;
-  color: #292300;
-}
-
-.vote-button.blue {
-  background: #75cfff;
-  color: #073d59;
-}
-
-.vote-button.red {
-  background: #e53935;
-  color: white;
-}
-
-.vote-button.black {
-  background: #050505;
-  color: white;
-  border: 1px solid #777777;
-}
-
-.vote-button:disabled {
-  opacity: 0.65;
-  cursor: default;
-}
-
-.results {
-  margin: 10px 4px 0;
-}
-
-.result-line {
-  display: flex;
-  justify-content: space-between;
-  font-size: 12px;
-  color: #bbbbbb;
-  margin-bottom: 6px;
-}
-
-.progress {
-  height: 10px;
-  border-radius: 20px;
-  background: #333333;
-  overflow: hidden;
-}
-
-.progress-bar {
-  height: 100%;
-  width: 0;
-  border-radius: 20px;
-  background: #8e9be8;
-  transition: width 0.3s ease;
-}
-
-.total {
-  text-align: center;
-  color: #bbbbbb;
-  font-size: 13px;
-  margin: 25px 0;
-}
-
-@media (max-width: 380px) {
-  .candidate {
-    gap: 8px;
-    padding: 11px 9px;
-  }
-
-  .vote-button {
-    min-width: 75px;
-    padding: 10px 9px;
-  }
-}
-</style>
+    #message {
+      text-align: center;
+      color: #ffd900;
+      margin: 20px auto;
+      max-width: 500px;
+    }
+  </style>
 </head>
 
 <body>
+  <h1>⭐ STAR ACADEMY ⭐</h1>
+  <h2>CÔTE DE POPULARITÉ</h2>
 
-<header>
-  <h1>⭐ COTE DE POPULARITÉ ⭐</h1>
-  <div class="subtitle">
-    Star Academy • Vote pour ton candidat préféré
-  </div>
-</header>
+  <div id="liste"></div>
+  <p id="message"></p>
 
-<main>
-  <div class="candidates" id="candidates"></div>
-  <div class="total" id="total">0 vote enregistré</div>
-</main>
+  <script>
+    const candidats = [
+      { nom: "Noémie", statut: "IMMUNISÉE", couleur: "jaune", votable: true },
+      { nom: "Maud", statut: "EN COMPÉTITION", couleur: "bleu", votable: true },
+      { nom: "Brieuc", statut: "EN COMPÉTITION", couleur: "bleu", votable: true },
+      { nom: "Leeloo", statut: "EN COMPÉTITION", couleur: "bleu", votable: true },
+      { nom: "Tracy", statut: "EN COMPÉTITION", couleur: "bleu", votable: true },
+      { nom: "Félix", statut: "EN COMPÉTITION", couleur: "bleu", votable: true },
+      { nom: "Morgan", statut: "EN COMPÉTITION", couleur: "bleu", votable: true },
+      { nom: "Cameron", statut: "EN COMPÉTITION", couleur: "bleu", votable: true },
+      { nom: "Amel", statut: "EN COMPÉTITION", couleur: "bleu", votable: true },
+      { nom: "Isabella", statut: "EN COMPÉTITION", couleur: "bleu", votable: true },
+      { nom: "Ydriss", statut: "EN COMPÉTITION", couleur: "bleu", votable: true },
+      { nom: "Melina", statut: "EN COMPÉTITION", couleur: "bleu", votable: true },
+      { nom: "Kylian", statut: "EN COMPÉTITION", couleur: "bleu", votable: true },
+      { nom: "Zoe", statut: "EN COMPÉTITION", couleur: "bleu", votable: true },
+      { nom: "Antoine", statut: "ÉLIMINÉ", couleur: "rouge", votable: false },
+      { nom: "Elija", statut: "ÉLIMINÉ", couleur: "rouge", votable: false },
+      { nom: "Khalil", statut: "ABANDON", couleur: "noir", votable: false }
+    ];
 
-<script>
+    const votes = candidats.map(() => 0);
+    const liste = document.getElementById("liste");
 
-const candidates = [
-  { name: "Noémie", status: "IMMUNISÉE", type: "immunise" },
-  { name: "Maud", status: "EN COMPÉTITION", type: "competition" },
-  { name: "Brieuc", status: "EN COMPÉTITION", type: "competition" },
-  { name: "Leeloo", status: "EN COMPÉTITION", type: "competition" },
-  { name: "Tracy", status: "EN COMPÉTITION", type: "competition" },
-  { name: "Félix", status: "EN COMPÉTITION", type: "competition" },
-  { name: "Morgan", status: "EN COMPÉTITION", type: "competition" },
-  { name: "Cameron", status: "EN COMPÉTITION", type: "competition" },
-  { name: "Amel", status: "EN COMPÉTITION", type: "competition" },
-  { name: "Isabella", status: "EN COMPÉTITION", type: "competition" },
-  { name: "Ydriss", status: "EN COMPÉTITION", type: "competition" },
-  { name: "Melina", status: "EN COMPÉTITION", type: "competition" },
-  { name: "Kylian", status: "EN COMPÉTITION", type: "competition" },
-  { name: "Zoe", status: "EN COMPÉTITION", type: "competition" },
-  { name: "Antoine", status: "ÉLIMINÉ", type: "elimine" },
-  { name: "Elija", status: "ÉLIMINÉ", type: "elimine" },
-  { name: "Khalil", status: "ABANDON", type: "abandon" }
-];
+    candidats.forEach((candidat, index) => {
+      const carte = document.createElement("div");
+      carte.className = "candidat";
 
-const votes = {};
-let totalVotes = 0;
-let hasVoted = false;
+      carte.innerHTML = `
+        <div class="nom">${candidat.nom}</div>
+        <span class="statut ${candidat.couleur}">
+          ${candidat.statut}
+        </span>
 
-candidates.forEach(candidate => {
-  votes[candidate.name] = 0;
-});
+        <button
+          class="${candidat.couleur}"
+          id="vote-${index}"
+          ${candidat.votable ? "" : "disabled"}
+        >
+          ${candidat.votable
+            ? "VOTER POUR " + candidat.nom.toUpperCase()
+            : "VOTE IMPOSSIBLE"}
+        </button>
 
-function getButtonColor(type) {
-  if (type === "immunise") return "yellow";
-  if (type === "competition") return "blue";
-  if (type === "elimine") return "red";
-  return "black";
-}
+        <div class="barre">
+          <div class="progression" id="barre-${index}"></div>
+        </div>
 
-function render() {
-  const container = document.getElementById("candidates");
-  container.innerHTML = "";
+        <div class="compteur" id="compteur-${index}">
+          0 vote
+        </div>
+      `;
 
-  candidates.forEach((candidate, index) => {
-    const rank = index + 1;
+      liste.appendChild(carte);
 
-    const percentage = totalVotes === 0
-      ? 0
-      : (votes[candidate.name] / totalVotes) * 100;
+      if (candidat.votable) {
+        document.getElementById(`vote-${index}`).addEventListener("click", () => {
+          votes[index]++;
+          actualiser();
 
-    const card = document.createElement("div");
-    card.className = "candidate";
-
-    const rankElement = document.createElement("div");
-    rankElement.className = "rank";
-    rankElement.textContent = rank;
-
-    const info = document.createElement("div");
-    info.className = "info";
-
-    const name = document.createElement("div");
-    name.className = "name";
-    name.textContent = candidate.name;
-
-    const status = document.createElement("span");
-    status.className = "status " + candidate.type;
-    status.textContent = candidate.status;
-
-    info.appendChild(name);
-    info.appendChild(status);
-
-    const button = document.createElement("button");
-    button.className =
-      "vote-button " + getButtonColor(candidate.type);
-
-    button.textContent = hasVoted ? "VOTÉ" : "VOTER";
-    button.disabled = hasVoted;
-
-    button.addEventListener("click", () => {
-      if (hasVoted) return;
-
-      votes[candidate.name]++;
-      totalVotes++;
-      hasVoted = true;
-
-      render();
+          document.getElementById("message").textContent =
+            "Merci pour ton vote ! ❤️";
+        });
+      }
     });
 
-    card.appendChild(rankElement);
-    card.appendChild(info);
-    card.appendChild(button);
+    function actualiser() {
+      const total = votes.reduce((a, b) => a + b, 0);
 
-    const wrapper = document.createElement("div");
-    wrapper.appendChild(card);
+      candidats.forEach((candidat, index) => {
+        const pourcentage = total === 0
+          ? 0
+          : votes[index] / total * 100;
 
-    const results = document.createElement("div");
-    results.className = "results";
+        document.getElementById(`barre-${index}`).style.width =
+          pourcentage + "%";
 
-    const line = document.createElement("div");
-    line.className = "result-line";
-
-    const voteLabel = document.createElement("span");
-    voteLabel.textContent =
-      votes[candidate.name] + " vote(s)";
-
-    const percentLabel = document.createElement("span");
-    percentLabel.textContent =
-      percentage.toFixed(1) + " %";
-
-    line.appendChild(voteLabel);
-    line.appendChild(percentLabel);
-
-    const progress = document.createElement("div");
-    progress.className = "progress";
-
-    const bar = document.createElement("div");
-    bar.className = "progress-bar";
-    bar.style.width = percentage + "%";
-
-    progress.appendChild(bar);
-    results.appendChild(line);
-    results.appendChild(progress);
-
-    wrapper.appendChild(results);
-    container.appendChild(wrapper);
-  });
-
-  document.getElementById("total").textContent =
-    totalVotes +
-    (totalVotes > 1 ? " votes enregistrés" : " vote enregistré");
-}
-
-render();
-
-</script>
-
+        document.getElementById(`compteur-${index}`).textContent =
+          votes[index] + (votes[index] > 1 ? " votes" : " vote");
+      });
+    }
+  </script>
 </body>
 </html>

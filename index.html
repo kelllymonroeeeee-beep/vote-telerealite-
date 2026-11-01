@@ -4,133 +4,237 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Vote Arena</title>
+<title>Star Academy 2026 - Votes</title>
+
 <style>
-*{box-sizing:border-box}
-body{
- margin:0;
- font-family:Arial,sans-serif;
- background:#101827;
- color:white;
+* {
+  box-sizing: border-box;
 }
-header{
- padding:25px;
- text-align:center;
- background:#17243a;
+
+body {
+  margin: 0;
+  padding: 24px 14px;
+  background: #101018;
+  color: white;
+  font-family: Arial, sans-serif;
 }
-header h1{color:#60a5fa;margin:0}
-main{max-width:650px;margin:auto;padding:20px}
-.card{
- background:#1e293b;
- padding:20px;
- border-radius:15px;
- margin:15px 0;
+
+header {
+  text-align: center;
+  margin-bottom: 28px;
 }
-input{
- width:100%;padding:14px;border-radius:9px;
- border:0;margin:8px 0;font-size:16px;
+
+h1 {
+  color: #f4d34f;
+  font-size: 30px;
+  margin-bottom: 8px;
 }
-button{
- background:#3b82f6;color:white;border:0;
- padding:13px 20px;border-radius:9px;
- font-weight:bold;cursor:pointer;
+
+header p {
+  color: #aaa;
 }
-button:hover{background:#2563eb}
-.candidate{
- background:#263449;padding:15px;
- border-radius:10px;margin:12px 0;
+
+.container {
+  max-width: 600px;
+  margin: auto;
 }
-.bar{
- height:9px;background:#475569;
- border-radius:10px;margin-top:8px;
- overflow:hidden;
+
+.candidate {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #1d1d29;
+  border: 1px solid #30303e;
+  border-radius: 14px;
+  padding: 13px;
+  margin-bottom: 10px;
 }
-.fill{height:100%;background:#38bdf8}
-.rank{color:#fbbf24;font-weight:bold}
-footer{text-align:center;color:#94a3b8;padding:25px}
+
+.rank {
+  width: 30px;
+  color: #aaa;
+  font-weight: bold;
+  text-align: center;
+}
+
+.name {
+  flex: 1;
+  font-weight: bold;
+}
+
+.vote {
+  border: 0;
+  border-radius: 20px;
+  padding: 10px 15px;
+  font-weight: bold;
+  cursor: pointer;
+  background: #8ee5ff;
+  color: #10202a;
+}
+
+.count {
+  color: #aaa;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+/* NOÉMIE */
+.first {
+  border: 1px solid #e8c34b;
+  background: #292516;
+}
+
+.first .name {
+  color: #f4d34f;
+}
+
+.first .vote {
+  background: #f4d34f;
+  color: #171717;
+}
+
+.special {
+  color: #f4d34f;
+  font-size: 10px;
+  margin-left: 6px;
+}
+
+/* ANTOINE ET ELIJA */
+.eliminated .name {
+  color: #999;
+}
+
+.eliminated .vote {
+  background: #d94343;
+  color: white;
+}
+
+.elimination-tag {
+  color: #ff5555;
+  font-size: 10px;
+  margin-left: 6px;
+}
+
+/* KHALIL */
+.abandon .name {
+  color: #999;
+}
+
+.abandon .vote {
+  background: #000;
+  color: white;
+}
+
+.abandon-tag {
+  color: #fff;
+  background: #000;
+  font-size: 10px;
+  padding: 4px 6px;
+  border-radius: 5px;
+  margin-left: 6px;
+}
+
+footer {
+  text-align: center;
+  color: #777;
+  font-size: 12px;
+  margin: 25px 0;
+}
 </style>
 </head>
+
 <body>
+
 <header>
-<h1>🏆 VOTE ARENA</h1>
-<p>Vote pour tes favoris !</p>
+  <h1>⭐ STAR ACADEMY ⭐</h1>
+  <p>SAISON 2026 — 2027</p>
+  <p>Vote pour ton candidat préféré !</p>
 </header>
 
-<main>
-<div class="card">
-<h2>🗳️ Le grand vote</h2>
-<p>Choisis ton candidat préféré :</p>
-<div id="candidates"></div>
-</div>
+<main class="container" id="ranking"></main>
 
-<div class="card">
-<h2>🏆 Classement</h2>
-<div id="ranking"></div>
-</div>
-
-<div class="card">
-<h2>➕ Ajouter un candidat</h2>
-<input id="newName" placeholder="Nom du candidat">
-<button onclick="addCandidate()">Ajouter</button>
-</div>
-</main>
-
-<footer>Vote Arena © 2026</footer>
+<footer>
+  Classement des votes • Star Academy
+</footer>
 
 <script>
-let candidates = JSON.parse(localStorage.getItem("candidates")) || [
- {name:"Candidat 1",votes:0},
- {name:"Candidat 2",votes:0},
- {name:"Candidat 3",votes:0}
+const candidates = [
+  { name: "Noémie", status: "immune" },
+  { name: "Amel" },
+  { name: "Zoé" },
+  { name: "Isabella" },
+  { name: "Maud" },
+  { name: "Mélina" },
+  { name: "Tracy" },
+  { name: "Leeloo" },
+  { name: "Morgan" },
+  { name: "Cameron" },
+  { name: "Brieuc" },
+  { name: "Ydriss" },
+  { name: "Félix" },
+  { name: "Kylian" },
+  { name: "Antoine", status: "eliminated" },
+  { name: "Elija", status: "eliminated" },
+  { name: "Khalil", status: "abandon" }
 ];
 
-function save(){
- localStorage.setItem("candidates",JSON.stringify(candidates));
- render();
+const votes = {};
+candidates.forEach(candidate => {
+  votes[candidate.name] = 0;
+});
+
+function displayRanking() {
+  const ranking = document.getElementById("ranking");
+  ranking.innerHTML = "";
+
+  candidates.forEach((candidate, index) => {
+    const card = document.createElement("div");
+    card.className = "candidate";
+
+    if (candidate.status === "immune") {
+      card.classList.add("first");
+    }
+
+    if (candidate.status === "eliminated") {
+      card.classList.add("eliminated");
+    }
+
+    if (candidate.status === "abandon") {
+      card.classList.add("abandon");
+    }
+
+    let label = "";
+
+    if (candidate.status === "immune") {
+      label = '<span class="special">IMMUNISÉE</span>';
+    } else if (candidate.status === "eliminated") {
+      label = '<span class="elimination-tag">ÉLIMINER</span>';
+    } else if (candidate.status === "abandon") {
+      label = '<span class="abandon-tag">ABANDON</span>';
+    }
+
+    card.innerHTML = `
+      <div class="rank">${index + 1}</div>
+      <div class="name">
+        ${candidate.name} ${label}
+        <div class="count">${votes[candidate.name]} vote(s)</div>
+      </div>
+      <button class="vote" type="button">VOTER</button>
+    `;
+
+    const button = card.querySelector("button");
+
+    button.addEventListener("click", () => {
+      votes[candidate.name]++;
+      displayRanking();
+    });
+
+    ranking.appendChild(card);
+  });
 }
 
-function vote(index){
- candidates[index].votes++;
- save();
-}
-
-function addCandidate(){
- let name=document.getElementById("newName").value.trim();
- if(!name)return alert("Entre un nom !");
- if(candidates.some(c=>c.name.toLowerCase()===name.toLowerCase()))
- return alert("Ce candidat existe déjà !");
- candidates.push({name:name,votes:0});
- document.getElementById("newName").value="";
- save();
-}
-
-function render(){
- let total=candidates.reduce((s,c)=>s+c.votes,0);
- document.getElementById("candidates").innerHTML=
- candidates.map((c,i)=>`
- <div class="candidate">
- <h3>${escapeHTML(c.name)}</h3>
- <p>${c.votes} vote(s)</p>
- <button onclick="vote(${i})">VOTER</button>
- </div>`).join("");
-
- let sorted=[...candidates].sort((a,b)=>b.votes-a.votes);
- document.getElementById("ranking").innerHTML=
- sorted.map((c,i)=>`
- <div class="candidate">
- <span class="rank">#${i+1}</span>
- <strong> ${escapeHTML(c.name)}</strong>
- <p>${c.votes} vote(s) · ${total?Math.round(c.votes/total*100):0}%</p>
- <div class="bar"><div class="fill" style="width:${total?c.votes/total*100:0}%"></div></div>
- </div>`).join("");
-}
-
-function escapeHTML(s){
- return s.replace(/[&<>"']/g,c=>({
- "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
- }[c]));
-}
-render();
+displayRanking();
 </script>
+
 </body>
 </html>

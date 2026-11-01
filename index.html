@@ -4,225 +4,129 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Star Academy - Côte de popularité</title>
-
+<title>Star Academy - Votes</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-* {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-  padding: 20px;
-  background: #000;
-  color: white;
-  font-family: Arial, sans-serif;
-}
-
-h1, h2 {
-  text-align: center;
-}
-
-h1 {
-  margin-bottom: 30px;
-}
-
-h2 {
-  font-size: 22px;
-  margin-bottom: 25px;
-}
-
-.candidat {
-  max-width: 500px;
-  margin: 14px auto;
-  padding: 16px;
-  background: #191919;
-  border-radius: 12px;
-}
-
-.nom {
-  font-size: 20px;
-  font-weight: bold;
-  margin-bottom: 10px;
-}
-
-.statut {
-  display: inline-block;
-  font-size: 12px;
-  font-weight: bold;
-  padding: 6px 10px;
-  border-radius: 20px;
-  margin-bottom: 12px;
-}
-
-.jaune {
-  background: #ffd900;
-  color: black;
-}
-
-.bleu {
-  background: #38bdf8;
-  color: #001522;
-}
-
-.rouge {
-  background: #e53935;
-  color: white;
-}
-
-.noir {
-  background: #000;
-  color: white;
-  border: 1px solid #777;
-}
-
-button {
-  display: block;
-  width: 100%;
-  padding: 12px;
-  border: none;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: bold;
-  cursor: pointer;
-  margin-bottom: 12px;
-}
-
-button:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
-
-.barre {
-  height: 12px;
-  background: #444;
-  border-radius: 20px;
-  overflow: hidden;
-}
-
-.progression {
-  height: 100%;
-  width: 0%;
-  background: #38bdf8;
-  transition: width 0.3s;
-}
-
-.compteur {
-  text-align: right;
-  font-size: 12px;
-  color: #ccc;
-  margin-top: 5px;
-}
-
-#message {
-  text-align: center;
-  color: #ffd900;
-  margin: 20px auto;
-}
+*{box-sizing:border-box}
+body{margin:0;padding:24px 14px;background:#080808;color:white;font-family:Arial,sans-serif;text-align:center}
+h1{font-size:27px;margin:10px 0 8px}
+h2{font-size:19px;color:#f5d34f;margin:28px 0 18px}
+.intro{color:#aaa;margin-bottom:25px}
+#status{color:#aaa;font-size:13px;margin:15px}
+.grid{max-width:650px;margin:auto;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.person{background:#171717;border:1px solid #333;border-radius:12px;padding:15px 10px}
+.name{font-size:19px;font-weight:bold;margin-bottom:8px}
+.state{font-size:11px;letter-spacing:1px;color:#bbb;margin-bottom:12px}
+button{width:100%;border:0;border-radius:8px;padding:12px 8px;font-weight:bold;font-size:14px;color:#080808;background:#4b9cff}
+button.yellow{background:#f5d34f}
+button.red{background:#e34b4b;color:white}
+button.black{background:#333;color:white}
+button:disabled{opacity:.55;cursor:not-allowed}
+.count{margin-top:10px;color:#ddd;font-size:14px}
+@media(max-width:360px){.grid{grid-template-columns:1fr}}
 </style>
 </head>
-
 <body>
-
 <h1>⭐ STAR ACADEMY ⭐</h1>
+<div class="intro">Soutiens tes candidats préférés !</div>
 <h2>CÔTE DE POPULARITÉ</h2>
-
-<div id="liste"></div>
-<p id="message"></p>
+<div id="status">Connexion aux votes...</div>
+<div class="grid" id="candidates"></div>
 
 <script>
-const candidats = [
-  { nom: "Noémie", statut: "IMMUNISÉE", couleur: "jaune", votable: true },
-  { nom: "Maud", statut: "EN COMPÉTITION", couleur: "bleu", votable: true },
-  { nom: "Brieuc", statut: "EN COMPÉTITION", couleur: "bleu", votable: true },
-  { nom: "Leeloo", statut: "EN COMPÉTITION", couleur: "bleu", votable: true },
-  { nom: "Tracy", statut: "EN COMPÉTITION", couleur: "bleu", votable: true },
-  { nom: "Félix", statut: "EN COMPÉTITION", couleur: "bleu", votable: true },
-  { nom: "Morgan", statut: "EN COMPÉTITION", couleur: "bleu", votable: true },
-  { nom: "Cameron", statut: "EN COMPÉTITION", couleur: "bleu", votable: true },
-  { nom: "Amel", statut: "EN COMPÉTITION", couleur: "bleu", votable: true },
-  { nom: "Isabella", statut: "EN COMPÉTITION", couleur: "bleu", votable: true },
-  { nom: "Ydriss", statut: "EN COMPÉTITION", couleur: "bleu", votable: true },
-  { nom: "Melina", statut: "EN COMPÉTITION", couleur: "bleu", votable: true },
-  { nom: "Kylian", statut: "EN COMPÉTITION", couleur: "bleu", votable: true },
-  { nom: "Zoe", statut: "EN COMPÉTITION", couleur: "bleu", votable: true },
-  { nom: "Antoine", statut: "ÉLIMINÉ", couleur: "rouge", votable: false },
-  { nom: "Elija", statut: "ÉLIMINÉ", couleur: "rouge", votable: false },
-  { nom: "Khalil", statut: "ABANDON", couleur: "noir", votable: false }
+const SUPABASE_URL = "https://qdibctjpzozlpngvjsvc.supabase.co";
+const SUPABASE_KEY = "sb_publishable_X5SZIRRcg8wiInW1GQTvCw_eZKRPCmA";
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const people = [
+  {name:"Noémie", state:"IMMUNISÉE", style:"yellow", canVote:true},
+  {name:"Maud", state:"EN COMPÉTITION", style:"", canVote:true},
+  {name:"Brieuc", state:"EN COMPÉTITION", style:"", canVote:true},
+  {name:"Leeloo", state:"EN COMPÉTITION", style:"", canVote:true},
+  {name:"Tracy", state:"EN COMPÉTITION", style:"", canVote:true},
+  {name:"Félix", state:"EN COMPÉTITION", style:"", canVote:true},
+  {name:"Morgan", state:"EN COMPÉTITION", style:"", canVote:true},
+  {name:"Cameron", state:"EN COMPÉTITION", style:"", canVote:true},
+  {name:"Amel", state:"EN COMPÉTITION", style:"", canVote:true},
+  {name:"Isabella", state:"EN COMPÉTITION", style:"", canVote:true},
+  {name:"Ydriss", state:"EN COMPÉTITION", style:"", canVote:true},
+  {name:"Melina", state:"EN COMPÉTITION", style:"", canVote:true},
+  {name:"Kylian", state:"EN COMPÉTITION", style:"", canVote:true},
+  {name:"Zoe", state:"EN COMPÉTITION", style:"", canVote:true},
+  {name:"Antoine", state:"ÉLIMINÉ", style:"red", canVote:false},
+  {name:"Elija", state:"ÉLIMINÉ", style:"red", canVote:false},
+  {name:"Khalil", state:"ABANDON", style:"black", canVote:false}
 ];
 
-const votes = candidats.map(() => 0);
-const liste = document.getElementById("liste");
+const container = document.getElementById("candidates");
 
-candidats.forEach((candidat, index) => {
-  const carte = document.createElement("div");
-  carte.className = "candidat";
+function displayPeople(counts) {
+  container.innerHTML = "";
+  people.forEach(person => {
+    const card = document.createElement("div");
+    card.className = "person";
 
-  const nom = document.createElement("div");
-  nom.className = "nom";
-  nom.textContent = candidat.nom;
+    const name = document.createElement("div");
+    name.className = "name";
+    name.textContent = person.name;
 
-  const statut = document.createElement("span");
-  statut.className = "statut " + candidat.couleur;
-  statut.textContent = candidat.statut;
+    const state = document.createElement("div");
+    state.className = "state";
+    state.textContent = person.state;
 
-  const bouton = document.createElement("button");
-  bouton.className = candidat.couleur;
-  bouton.textContent = candidat.votable
-    ? "VOTER POUR " + candidat.nom.toUpperCase()
-    : "VOTE IMPOSSIBLE";
-  bouton.disabled = !candidat.votable;
+    const button = document.createElement("button");
+    button.className = person.style;
+    button.textContent = person.canVote ? "VOTER" : "VOTE IMPOSSIBLE";
+    button.disabled = !person.canVote;
+    if (person.canVote) {
+      button.addEventListener("click", () => castVote(person.name, button));
+    }
 
-  const barre = document.createElement("div");
-  barre.className = "barre";
+    const count = document.createElement("div");
+    count.className = "count";
+    count.id = "count-" + person.name;
+    count.textContent = (counts[person.name] || 0) + " vote(s)";
 
-  const progression = document.createElement("div");
-  progression.className = "progression";
-  progression.id = "barre-" + index;
-
-  barre.appendChild(progression);
-
-  const compteur = document.createElement("div");
-  compteur.className = "compteur";
-  compteur.id = "compteur-" + index;
-  compteur.textContent = "0 vote";
-
-  carte.appendChild(nom);
-  carte.appendChild(statut);
-  carte.appendChild(bouton);
-  carte.appendChild(barre);
-  carte.appendChild(compteur);
-
-  liste.appendChild(carte);
-
-  if (candidat.votable) {
-    bouton.addEventListener("click", function() {
-      votes[index]++;
-      actualiser();
-
-      document.getElementById("message").textContent =
-        "Merci pour ton vote ! ❤️";
-    });
-  }
-});
-
-function actualiser() {
-  const total = votes.reduce((a, b) => a + b, 0);
-
-  candidats.forEach((candidat, index) => {
-    const pourcentage = total === 0
-      ? 0
-      : (votes[index] / total) * 100;
-
-    document.getElementById("barre-" + index).style.width =
-      pourcentage + "%";
-
-    document.getElementById("compteur-" + index).textContent =
-      votes[index] + (votes[index] > 1 ? " votes" : " vote");
+    card.append(name, state, button, count);
+    container.appendChild(card);
   });
 }
-</script>
 
+async function refreshVotes() {
+  const { data, error } = await db.from("votes").select("candidate");
+
+  if (error) {
+    document.getElementById("status").textContent =
+      "Erreur de chargement des votes. Vérifie les réglages Supabase.";
+    console.error(error);
+    return;
+  }
+
+  const counts = {};
+  data.forEach(row => {
+    counts[row.candidate] = (counts[row.candidate] || 0) + 1;
+  });
+
+  displayPeople(counts);
+  document.getElementById("status").textContent = "Votes partagés en ligne ✓";
+}
+
+async function castVote(candidate, button) {
+  button.disabled = true;
+  button.textContent = "ENVOI...";
+
+  const { error } = await db.from("votes").insert({candidate: candidate});
+
+  if (error) {
+    alert("Le vote n'a pas été enregistré. Réessaie !");
+    console.error(error);
+  }
+
+  await refreshVotes();
+}
+
+refreshVotes();
+setInterval(refreshVotes, 5000);
+</script>
 </body>
 </html>
-

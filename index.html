@@ -1,1 +1,534 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Télé Réal’Stats</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+<style>
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #101426;
+  color: white;
+}
+
+header {
+  text-align: center;
+  padding: 25px 12px;
+  background: linear-gradient(135deg, #192c59, #56318c);
+}
+
+header h1 { margin: 0; font-size: 30px; }
+header p { color: #ddd; }
+
+nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px;
+  background: #171d34;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+nav button {
+  border: 0;
+  border-radius: 20px;
+  padding: 11px 14px;
+  background: #303956;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+nav button.active {
+  background: #f1c84b;
+  color: #171717;
+}
+
+main {
+  max-width: 900px;
+  margin: auto;
+  padding: 18px;
+}
+
+.page { display: none; }
+.page.active { display: block; }
+
+h2 { text-align: center; }
+
+.subtitle {
+  text-align: center;
+  color: #c4c9dc;
+  margin-bottom: 22px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 13px;
+}
+
+.card {
+  border-radius: 15px;
+  padding: 17px;
+  border: 2px solid #398cff;
+  background: #203d70;
+}
+
+.card h3 { margin: 0 0 10px; font-size: 20px; }
+
+.status {
+  display: inline-block;
+  border-radius: 20px;
+  padding: 5px 10px;
+  font-size: 12px;
+  font-weight: bold;
+  background: rgba(0,0,0,.25);
+}
+
+.pop-blue {
+  background: #203d70;
+  border-color: #398cff;
+}
+
+.pop-yellow {
+  background: #55491e;
+  border-color: #f1d044;
+  color: white;
+}
+
+.pop-red {
+  background: #542b35;
+  border-color: #ff4055;
+}
+
+.pop-black {
+  background: #080808;
+  border-color: #777;
+}
+
+.rating-card {
+  margin-bottom: 13px;
+  background: #203d70;
+  border-color: #398cff;
+}
+
+.rating-red {
+  background: #542b35;
+  border-color: #ff4055;
+}
+
+.rating-yellow {
+  background: #55491e;
+  border-color: #f1d044;
+}
+
+.rating-green {
+  background: #194c38;
+  border-color: #36cf85;
+}
+
+.rating-orange {
+  background: #633b1c;
+  border-color: #ff9b36;
+}
+
+.vote, .rate-button {
+  width: 100%;
+  border: 0;
+  border-radius: 9px;
+  padding: 11px;
+  margin-top: 10px;
+  background: #f1c84b;
+  color: #171717;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.vote:disabled, .rate-button:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+.progress {
+  height: 12px;
+  background: #101426;
+  border-radius: 20px;
+  overflow: hidden;
+  margin-top: 9px;
+}
+
+.progress span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #39a9ff, #9b6cff);
+}
+
+.count, .average {
+  font-weight: bold;
+  color: #f2d36c;
+}
+
+.rating-card select {
+  width: 100%;
+  padding: 10px;
+  margin-top: 8px;
+  border-radius: 8px;
+  background: #101426;
+  color: white;
+  border: 1px solid #65708c;
+}
+
+.message {
+  text-align: center;
+  background: #252e49;
+  border-radius: 12px;
+  padding: 20px;
+  color: #dce2f3;
+}
+
+.error {
+  color: #ff9c9c;
+  text-align: center;
+  padding: 12px;
+  overflow-wrap: anywhere;
+}
+
+footer {
+  text-align: center;
+  color: #8992ad;
+  padding: 25px;
+  font-size: 12px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>📺 TÉLÉ RÉAL’STATS</h1>
+  <p>Les statistiques du public — Semaine 4</p>
+</header>
+
+<nav>
+  <button class="active" data-page="popularity">📊 Popularité</button>
+  <button data-page="nominations">🛑 Nominations</button>
+  <button data-page="top3">⭐ Top 3</button>
+  <button data-page="ratings">✏️ Notes du Public</button>
+</nav>
+
+<main>
+
+<section id="popularity" class="page active">
+  <h2>📊 POPULARITÉ — SEMAINE 4</h2>
+  <p class="subtitle">Vote pour ton candidat préféré !</p>
+  <div id="vote-total" class="subtitle">Chargement des votes...</div>
+  <div id="vote-error" class="error"></div>
+  <div id="candidates" class="grid"></div>
+</section>
+
+<section id="nominations" class="page">
+  <h2>🛑 NOMINATIONS — SEMAINE 4</h2>
+  <p class="subtitle">Les Évaluations n’ont pas encore été faites.</p>
+  <div class="message">
+    <h3>1 — NON DÉFINI</h3>
+    <h3>2 — NON DÉFINI</h3>
+    <h3>3 — NON DÉFINI</h3>
+    <p>Les nominations seront affichées après les évaluations.</p>
+  </div>
+</section>
+
+<section id="top3" class="page">
+  <h2>⭐ TOP 3 — SEMAINE 4</h2>
+  <div class="message">
+    <p>Le classement du Top 3 sera affiché après les évaluations.</p>
+  </div>
+</section>
+
+<section id="ratings" class="page">
+  <h2>✏️ NOTES DU PUBLIC — PRIME 4</h2>
+  <p class="subtitle">Attribue une note sur 20 à chaque candidat.</p>
+  <div id="rating-error" class="error"></div>
+  <div id="rating-list">Chargement des notes...</div>
+</section>
+
+</main>
+
+<footer>Télé Réal’Stats — Site non officiel</footer>
+
+<script>
+/* CONNEXION SUPABASE */
+const SUPABASE_URL = "https://qdibctjpzozlpngvjsvc.supabase.co";
+const SUPABASE_KEY = "sb_publishable_X5SZIRRcg8wiInW1GQTvCw_eZKRPCmA";
+
+let db = null;
+
+try {
+  if (!window.supabase) {
+    throw new Error("La bibliothèque Supabase n'a pas chargé.");
+  }
+  db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+} catch (error) {
+  document.getElementById("vote-error").textContent = error.message;
+  document.getElementById("rating-error").textContent = error.message;
+}
+
+/* CANDIDATS ET COULEURS DE POPULARITÉ */
+const candidates = [
+  {name:"Noémie", status:"IMMUNISÉE", color:"pop-yellow", canVote:true},
+  {name:"Maud", status:"EN COMPÉTITION", color:"pop-blue", canVote:true},
+  {name:"Brieuc", status:"EN COMPÉTITION", color:"pop-blue", canVote:true},
+  {name:"Leeloo", status:"EN COMPÉTITION", color:"pop-blue", canVote:true},
+  {name:"Tracy", status:"EN COMPÉTITION", color:"pop-blue", canVote:true},
+  {name:"Félix", status:"EN COMPÉTITION", color:"pop-blue", canVote:true},
+  {name:"Morgan", status:"EN COMPÉTITION", color:"pop-blue", canVote:true},
+  {name:"Cameron", status:"EN COMPÉTITION", color:"pop-blue", canVote:true},
+  {name:"Amel", status:"EN COMPÉTITION", color:"pop-blue", canVote:true},
+  {name:"Isabella", status:"EN COMPÉTITION", color:"pop-blue", canVote:true},
+  {name:"Ydriss", status:"EN COMPÉTITION", color:"pop-blue", canVote:true},
+  {name:"Melina", status:"EN COMPÉTITION", color:"pop-blue", canVote:true},
+  {name:"Kylian", status:"EN COMPÉTITION", color:"pop-blue", canVote:true},
+  {name:"Zoe", status:"EN COMPÉTITION", color:"pop-blue", canVote:true},
+  {name:"Antoine", status:"ÉLIMINÉ", color:"pop-red", canVote:false, rank:"15e"},
+  {name:"Elija", status:"ÉLIMINÉ", color:"pop-red", canVote:false, rank:"16e"},
+  {name:"Khalil", status:"ABANDON", color:"pop-black", canVote:false, rank:"17e"}
+];
+
+/* CANDIDATS DES NOTES DU PUBLIC */
+const ratingCandidates = [
+  "Noémie", "Kylian", "Melina", "Brieuc", "Leeloo",
+  "Tracy", "Félix", "Morgan", "Cameron", "Amel",
+  "Isabella", "Zoe", "Maud", "Ydriss", "Antoine"
+];
+
+/* COULEURS DES NOTES DU PUBLIC */
+const ratingStyles = {
+  "Antoine": "rating-red",
+  "Noémie": "rating-yellow",
+  "Melina": "rating-green",
+  "Kylian": "rating-green",
+  "Maud": "rating-orange",
+  "Ydriss": "rating-orange"
+};
+
+/* IDENTIFIANT DU NAVIGATEUR */
+let voterId = localStorage.getItem("telerealstats_voter_id");
+
+if (!voterId) {
+  voterId = (window.crypto && crypto.randomUUID)
+    ? crypto.randomUUID()
+    : "voteur-" + Date.now() + "-" + Math.random().toString(36).slice(2);
+  localStorage.setItem("telerealstats_voter_id", voterId);
+}
+
+/* NAVIGATION */
+document.querySelectorAll("nav button").forEach(button => {
+  button.addEventListener("click", () => {
+    document.querySelectorAll("nav button").forEach(b => b.classList.remove("active"));
+    document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+    button.classList.add("active");
+    document.getElementById(button.dataset.page).classList.add("active");
+  });
+});
+
+/* AFFICHAGE DE LA POPULARITÉ */
+function renderCandidates(votes) {
+  const container = document.getElementById("candidates");
+  const total = votes.length;
+
+  document.getElementById("vote-total").textContent =
+    "Nombre total de votes : " + total;
+
+  container.innerHTML = "";
+
+  candidates.forEach(candidate => {
+    const count = votes.filter(v => v.candidate === candidate.name).length;
+    const percentage = total ? count / total * 100 : 0;
+
+    const card = document.createElement("div");
+    card.className = "card " + candidate.color;
+
+    let content = `
+      <h3>${candidate.name}</h3>
+      <span class="status">${candidate.status}</span>
+    `;
+
+    if (candidate.canVote) {
+      content += `
+        <p class="count">${count} vote(s) — ${percentage.toFixed(1)} %</p>
+        <div class="progress">
+          <span style="width:${Math.min(percentage,100)}%"></span>
+        </div>
+        <button class="vote" data-candidate="${candidate.name}">VOTER</button>
+      `;
+    } else {
+      content += `<p>Position : ${candidate.rank}</p>`;
+    }
+
+    card.innerHTML = content;
+    container.appendChild(card);
+  });
+
+  container.querySelectorAll(".vote").forEach(button => {
+    button.addEventListener("click", () => {
+      castVote(button.dataset.candidate, button);
+    });
+  });
+}
+
+/* CHARGEMENT DES VOTES */
+async function refreshVotes() {
+  if (!db) return;
+
+  const errorBox = document.getElementById("vote-error");
+  errorBox.textContent = "";
+
+  const {data, error} = await db
+    .from("votes")
+    .select("candidate");
+
+  if (error) {
+    errorBox.textContent = "Erreur de chargement des votes : " + error.message;
+    return;
+  }
+
+  renderCandidates(data || []);
+}
+
+/* ENREGISTREMENT D'UN VOTE */
+async function castVote(name, button) {
+  if (!db) return;
+
+  button.disabled = true;
+  button.textContent = "ENVOI...";
+
+  const {error} = await db
+    .from("votes")
+    .insert([{candidate:name}]);
+
+  if (error) {
+    document.getElementById("vote-error").textContent =
+      "Impossible d'enregistrer le vote : " + error.message;
+    button.disabled = false;
+    button.textContent = "VOTER";
+    return;
+  }
+
+  await refreshVotes();
+}
+
+/* CHARGEMENT DES NOTES */
+async function refreshRatings() {
+  if (!db) return;
+
+  const errorBox = document.getElementById("rating-error");
+  const list = document.getElementById("rating-list");
+
+  errorBox.textContent = "";
+  list.textContent = "Chargement des notes...";
+
+  const {data, error} = await db
+    .from("ratings")
+    .select("candidate,score,voter_id");
+
+  if (error) {
+    list.textContent = "";
+    errorBox.textContent = "Erreur de chargement des notes : " + error.message;
+    return;
+  }
+
+  list.innerHTML = "";
+
+  ratingCandidates.forEach(name => {
+    const notes = (data || []).filter(r => r.candidate === name);
+    const average = notes.length
+      ? notes.reduce((sum,r) => sum + Number(r.score),0) / notes.length
+      : null;
+
+    const alreadyRated = notes.some(r => r.voter_id === voterId);
+
+    const card = document.createElement("div");
+    card.className = "card rating-card " + (ratingStyles[name] || "");
+
+    const title = document.createElement("h3");
+    title.textContent = name;
+    card.appendChild(title);
+
+    const averageText = document.createElement("p");
+    averageText.className = "average";
+    averageText.textContent = average === null
+      ? "Moyenne : aucune note"
+      : "Moyenne : " + average.toFixed(1) + " / 20 (" + notes.length + " note(s))";
+    card.appendChild(averageText);
+
+    if (alreadyRated) {
+      const done = document.createElement("p");
+      done.textContent = "Tu as déjà noté ce candidat sur ce navigateur.";
+      card.appendChild(done);
+    } else {
+      const select = document.createElement("select");
+      select.setAttribute("aria-label", "Note pour " + name);
+
+      for (let score = 0; score <= 20; score++) {
+        const option = document.createElement("option");
+        option.value = score;
+        option.textContent = score + " / 20";
+        select.appendChild(option);
+      }
+
+      const button = document.createElement("button");
+      button.className = "rate-button";
+      button.textContent = "ENVOYER MA NOTE";
+
+      button.addEventListener("click", () => {
+        submitRating(name, Number(select.value), button);
+      });
+
+      card.appendChild(select);
+      card.appendChild(button);
+    }
+
+    list.appendChild(card);
+  });
+}
+
+/* ENREGISTREMENT D'UNE NOTE */
+async function submitRating(name, score, button) {
+  if (!db) return;
+
+  button.disabled = true;
+  button.textContent = "ENVOI...";
+
+  const {error} = await db
+    .from("ratings")
+    .insert([{
+      candidate:name,
+      score:score,
+      voter_id:voterId
+    }]);
+
+  if (error) {
+    document.getElementById("rating-error").textContent =
+      "Impossible d'enregistrer la note : " + error.message;
+    button.disabled = false;
+    button.textContent = "ENVOYER MA NOTE";
+    return;
+  }
+
+  await refreshRatings();
+}
+
+/* DÉMARRAGE */
+refreshVotes();
+refreshRatings();
+</script>
+
+</body>
+</html>

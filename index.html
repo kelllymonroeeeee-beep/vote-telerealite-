@@ -6,123 +6,392 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Star Academy - Votes</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
-*{box-sizing:border-box}
-body{margin:0;padding:24px 14px;background:#080808;color:white;font-family:Arial,sans-serif;text-align:center}
-h1{font-size:27px;margin:10px 0 8px}
-h2{font-size:19px;color:#f5d34f;margin:28px 0 18px}
-.intro{color:#aaa;margin-bottom:25px}
-#status{color:#aaa;font-size:13px;margin:15px}
-.grid{max-width:650px;margin:auto;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-.person{background:#171717;border:1px solid #333;border-radius:12px;padding:15px 10px}
-.name{font-size:19px;font-weight:bold;margin-bottom:8px}
-.state{font-size:11px;letter-spacing:1px;color:#bbb;margin-bottom:12px}
-button{width:100%;border:0;border-radius:8px;padding:12px 8px;font-weight:bold;font-size:14px;color:#080808;background:#4b9cff}
-button.yellow{background:#f5d34f}
-button.red{background:#e34b4b;color:white}
-button.black{background:#333;color:white}
-button:disabled{opacity:.55;cursor:not-allowed}
-.count{margin-top:10px;color:#ddd;font-size:14px}
-@media(max-width:360px){.grid{grid-template-columns:1fr}}
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  padding: 20px;
+  background: #10121c;
+  color: white;
+  font-family: Arial, sans-serif;
+}
+
+.container { max-width: 650px; margin: auto; }
+
+h1 {
+  text-align: center;
+  color: #f5c85b;
+  margin-bottom: 20px;
+}
+
+.subtitle {
+  text-align: center;
+  color: #999eae;
+  font-size: 13px;
+  margin: 0 0 5px;
+}
+
+.week {
+  text-align: center;
+  color: #f5c85b;
+  font-size: 13px;
+  font-weight: bold;
+  margin: 8px 0 18px;
+}
+
+.tabs {
+  display: flex;
+  gap: 8px;
+  margin: 20px 0;
+}
+
+.tab {
+  flex: 1;
+  padding: 13px 5px;
+  border: 1px solid #44485a;
+  border-radius: 12px;
+  background: #202333;
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.tab.active {
+  background: #f5c85b;
+  color: #171717;
+  border-color: #f5c85b;
+}
+
+.panel { display: none; }
+.panel.active { display: block; }
+
+.card {
+  background: #202333;
+  border: 1px solid #373b4d;
+  border-radius: 12px;
+  padding: 15px;
+  margin-bottom: 12px;
+}
+
+.person {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.name {
+  font-weight: bold;
+  font-size: 17px;
+}
+
+.status, .rank {
+  color: #999eae;
+  font-size: 11px;
+  margin-top: 5px;
+}
+
+.count, .percent {
+  color: #f5c85b;
+  font-weight: bold;
+  text-align: right;
+}
+
+.percent { margin-top: 4px; }
+
+.bar-bg {
+  height: 8px;
+  background: #414557;
+  border-radius: 10px;
+  margin-top: 12px;
+  overflow: hidden;
+}
+
+.bar {
+  height: 100%;
+  background: #f5c85b;
+  border-radius: 10px;
+}
+
+.vote {
+  margin-top: 12px;
+  padding: 10px 18px;
+  border: 0;
+  border-radius: 8px;
+  background: #80dfff;
+  color: #111;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.vote.noemie {
+  background: #f5c85b;
+  color: #171717;
+}
+
+.vote.elija, .vote.antoine {
+  background: #ed4545;
+  color: #bdbdbd;
+}
+
+.vote.khalil {
+  background: #000;
+  color: #bdbdbd;
+}
+
+.vote:disabled { cursor: not-allowed; }
+
+.total {
+  text-align: center;
+  color: #ccc;
+  margin-bottom: 18px;
+}
+
+.placeholder {
+  background: #202333;
+  border: 1px solid #373b4d;
+  border-radius: 12px;
+  padding: 18px;
+  margin-bottom: 12px;
+  text-align: center;
+  color: #aaa;
+  font-weight: bold;
+}
+
+.message {
+  text-align: center;
+  color: #9296a5;
+  font-size: 13px;
+  margin: 18px 0;
+}
 </style>
 </head>
+
 <body>
-<h1>⭐ STAR ACADEMY ⭐</h1>
-<div class="intro">Soutiens tes candidats préférés !</div>
-<h2>CÔTE DE POPULARITÉ</h2>
-<div id="status">Connexion aux votes...</div>
-<div class="grid" id="candidates"></div>
+<div class="container">
+
+  <h1>⭐ STAR ACADEMY ⭐</h1>
+
+  <div class="tabs">
+    <button class="tab active" data-panel="popularite">📊 Popularité</button>
+    <button class="tab" data-panel="nominations">🛑 Nominations</button>
+    <button class="tab" data-panel="top3">⭐️ Top 3</button>
+  </div>
+
+  <section id="popularite" class="panel active">
+    <p class="subtitle">Côte de popularité</p>
+    <p class="week">Semaine 4</p>
+    <div class="total" id="total">Chargement des votes...</div>
+    <div id="candidates"></div>
+  </section>
+
+  <section id="nominations" class="panel">
+    <p class="week">Semaine 4</p>
+    <div class="placeholder">1 — NON DÉFINI</div>
+    <div class="placeholder">2 — NON DÉFINI</div>
+    <div class="placeholder">3 — NON DÉFINI</div>
+    <p class="message">Les Évaluations n’ont pas encore été faites</p>
+  </section>
+
+  <section id="top3" class="panel">
+    <p class="week">Semaine 4</p>
+    <p class="message">Les Évaluations n’ont pas encore été faites</p>
+  </section>
+
+</div>
 
 <script>
 const SUPABASE_URL = "https://qdibctjpzozlpngvjsvc.supabase.co";
 const SUPABASE_KEY = "sb_publishable_X5SZIRRcg8wiInW1GQTvCw_eZKRPCmA";
+
 const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-const people = [
-  {name:"Noémie", state:"IMMUNISÉE", style:"yellow", canVote:true},
-  {name:"Maud", state:"EN COMPÉTITION", style:"", canVote:true},
-  {name:"Brieuc", state:"EN COMPÉTITION", style:"", canVote:true},
-  {name:"Leeloo", state:"EN COMPÉTITION", style:"", canVote:true},
-  {name:"Tracy", state:"EN COMPÉTITION", style:"", canVote:true},
-  {name:"Félix", state:"EN COMPÉTITION", style:"", canVote:true},
-  {name:"Morgan", state:"EN COMPÉTITION", style:"", canVote:true},
-  {name:"Cameron", state:"EN COMPÉTITION", style:"", canVote:true},
-  {name:"Amel", state:"EN COMPÉTITION", style:"", canVote:true},
-  {name:"Isabella", state:"EN COMPÉTITION", style:"", canVote:true},
-  {name:"Ydriss", state:"EN COMPÉTITION", style:"", canVote:true},
-  {name:"Melina", state:"EN COMPÉTITION", style:"", canVote:true},
-  {name:"Kylian", state:"EN COMPÉTITION", style:"", canVote:true},
-  {name:"Zoe", state:"EN COMPÉTITION", style:"", canVote:true},
-  {name:"Antoine", state:"ÉLIMINÉ", style:"red", canVote:false},
-  {name:"Elija", state:"ÉLIMINÉ", style:"red", canVote:false},
-  {name:"Khalil", state:"ABANDON", style:"black", canVote:false}
+const candidates = [
+  { name: "Noémie", status: "IMMUNISÉE", canVote: true },
+  { name: "Maud", status: "EN COMPÉTITION", canVote: true },
+  { name: "Brieuc", status: "EN COMPÉTITION", canVote: true },
+  { name: "Leeloo", status: "EN COMPÉTITION", canVote: true },
+  { name: "Tracy", status: "EN COMPÉTITION", canVote: true },
+  { name: "Félix", status: "EN COMPÉTITION", canVote: true },
+  { name: "Morgan", status: "EN COMPÉTITION", canVote: true },
+  { name: "Cameron", status: "EN COMPÉTITION", canVote: true },
+  { name: "Amel", status: "EN COMPÉTITION", canVote: true },
+  { name: "Isabella", status: "EN COMPÉTITION", canVote: true },
+  { name: "Ydriss", status: "EN COMPÉTITION", canVote: true },
+  { name: "Melina", status: "EN COMPÉTITION", canVote: true },
+  { name: "Kylian", status: "EN COMPÉTITION", canVote: true },
+  { name: "Zoe", status: "EN COMPÉTITION", canVote: true },
+  { name: "Antoine", status: "ÉLIMINÉ", canVote: false, rank: "15e" },
+  { name: "Elija", status: "ÉLIMINÉ", canVote: false, rank: "16e" },
+  { name: "Khalil", status: "ABANDON", canVote: false, rank: "17e" }
 ];
 
-const container = document.getElementById("candidates");
+// Navigation entre les catégories
+document.querySelectorAll(".tab").forEach(button => {
+  button.addEventListener("click", () => {
+    document.querySelectorAll(".tab").forEach(tab =>
+      tab.classList.remove("active")
+    );
 
-function displayPeople(counts) {
-  container.innerHTML = "";
-  people.forEach(person => {
-    const card = document.createElement("div");
-    card.className = "person";
+    document.querySelectorAll(".panel").forEach(panel =>
+      panel.classList.remove("active")
+    );
 
-    const name = document.createElement("div");
-    name.className = "name";
-    name.textContent = person.name;
-
-    const state = document.createElement("div");
-    state.className = "state";
-    state.textContent = person.state;
-
-    const button = document.createElement("button");
-    button.className = person.style;
-    button.textContent = person.canVote ? "VOTER" : "VOTE IMPOSSIBLE";
-    button.disabled = !person.canVote;
-    if (person.canVote) {
-      button.addEventListener("click", () => castVote(person.name, button));
-    }
-
-    const count = document.createElement("div");
-    count.className = "count";
-    count.id = "count-" + person.name;
-    count.textContent = (counts[person.name] || 0) + " vote(s)";
-
-    card.append(name, state, button, count);
-    container.appendChild(card);
+    button.classList.add("active");
+    document.getElementById(button.dataset.panel).classList.add("active");
   });
+});
+
+function classNameFor(name) {
+  return name.toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
 }
 
+// Actualisation des votes
 async function refreshVotes() {
-  const { data, error } = await db.from("votes").select("candidate");
+  const { data, error } = await db
+    .from("votes")
+    .select("candidate");
 
   if (error) {
-    document.getElementById("status").textContent =
-      "Erreur de chargement des votes. Vérifie les réglages Supabase.";
+    document.getElementById("total").textContent =
+      "Erreur de chargement : " + error.message;
     console.error(error);
     return;
   }
 
   const counts = {};
-  data.forEach(row => {
-    counts[row.candidate] = (counts[row.candidate] || 0) + 1;
+  candidates.forEach(candidate => counts[candidate.name] = 0);
+
+  data.forEach(vote => {
+    if (Object.prototype.hasOwnProperty.call(counts, vote.candidate)) {
+      counts[vote.candidate]++;
+    }
   });
 
-  displayPeople(counts);
-  document.getElementById("status").textContent = "Votes partagés en ligne ✓";
-}
+  const activeCandidates = candidates.filter(c => c.canVote);
+  const total = activeCandidates.reduce(
+    (sum, candidate) => sum + counts[candidate.name], 0
+  );
 
-async function castVote(candidate, button) {
-  button.disabled = true;
-  button.textContent = "ENVOI...";
+  document.getElementById("total").textContent =
+    "Nombre total de votes : " + total;
 
-  const { error } = await db.from("votes").insert({candidate: candidate});
+  const percentages = {};
 
-  if (error) {
-    alert("Le vote n'a pas été enregistré. Réessaie !");
-    console.error(error);
+  if (total > 0) {
+    activeCandidates.forEach(candidate => {
+      percentages[candidate.name] =
+        Math.round(counts[candidate.name] / total * 1000) / 10;
+    });
+
+    const roundedTotal = activeCandidates.reduce(
+      (sum, candidate) => sum + percentages[candidate.name], 0
+    );
+
+    const highest = activeCandidates.reduce((best, candidate) =>
+      counts[candidate.name] > counts[best.name] ? candidate : best
+    );
+
+    percentages[highest.name] =
+      Math.round(
+        (percentages[highest.name] + 100 - roundedTotal) * 10
+      ) / 10;
   }
 
-  await refreshVotes();
+  document.getElementById("candidates").innerHTML =
+    candidates.map(candidate => {
+      const cssName = classNameFor(candidate.name);
+
+      if (!candidate.canVote) {
+        return `
+          <div class="card">
+            <div class="person">
+              <div>
+                <div class="name">${candidate.name}</div>
+                <div class="status">${candidate.status}</div>
+                <div class="rank">${candidate.rank}</div>
+              </div>
+            </div>
+            <button class="vote ${cssName}" disabled>
+              VOTE IMPOSSIBLE
+            </button>
+          </div>
+        `;
+      }
+
+      const percent = total > 0 ? percentages[candidate.name] : 0;
+
+      return `
+        <div class="card">
+          <div class="person">
+            <div>
+              <div class="name">${candidate.name}</div>
+              <div class="status">${candidate.status}</div>
+            </div>
+            <div>
+              <div class="count">${counts[candidate.name]} vote(s)</div>
+              <div class="percent">${percent.toFixed(1)} %</div>
+            </div>
+          </div>
+          <div class="bar-bg">
+            <div class="bar" style="width:${percent}%"></div>
+          </div>
+          <button class="vote ${cssName}" data-candidate="${candidate.name}">
+            VOTER
+          </button>
+        </div>
+      `;
+    }).join("");
+
+  document.querySelectorAll(".vote[data-candidate]").forEach(button => {
+    button.addEventListener("click", () => vote(button.dataset.candidate));
+  });
+}
+
+// Enregistrement d'un vote avec gestion des erreurs
+async function vote(candidate) {
+  const button = document.querySelector(
+    `.vote[data-candidate="${CSS.escape(candidate)}"]`
+  );
+
+  if (button) {
+    button.disabled = true;
+    button.textContent = "ENVOI...";
+  }
+
+  try {
+    const result = await Promise.race([
+      db.from("votes").insert({ candidate }),
+      new Promise((_, reject) =>
+        setTimeout(
+          () => reject(new Error("Délai dépassé. Vérifie ta connexion.")),
+          15000
+        )
+      )
+    ]);
+
+    if (result.error) {
+      throw result.error;
+    }
+
+    alert("Vote enregistré avec succès !");
+    await refreshVotes();
+
+  } catch (error) {
+    alert("Le vote n'a pas été enregistré : " + error.message);
+    console.error("Erreur de vote :", error);
+
+  } finally {
+    if (button) {
+      button.disabled = false;
+      button.textContent = "VOTER";
+    }
+  }
 }
 
 refreshVotes();

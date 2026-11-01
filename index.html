@@ -34,407 +34,282 @@ button.danger{background:#c52e4b}
 </style>
 </head>
 <body>
-
 <header>
-  <h1>⭐ Télé Réal’Stats</h1>
-  <p>Les statistiques de la télé-réalité</p>
+<h1>⭐ Télé Réal’Stats</h1>
+<p>Les statistiques de la télé-réalité</p>
 </header>
 
 <main>
-  <section id="authCard" class="card">
-    <h2 id="authTitle">Connexion</h2>
-    <input id="email" type="email" placeholder="Adresse e-mail" autocomplete="email">
-    <input id="password" type="password" placeholder="Mot de passe" autocomplete="current-password">
-    <button id="authButton" onclick="authenticate()">Se connecter</button>
-    <button class="secondary" onclick="toggleAuth()">Créer un compte</button>
-    <p class="muted">La confirmation par e-mail doit être désactivée dans Supabase pour une inscription immédiate.</p>
-  </section>
+<section id="authCard" class="card">
+<h2 id="authTitle">Connexion</h2>
+<input id="email" type="email" placeholder="Adresse e-mail" autocomplete="email">
+<input id="password" type="password" placeholder="Mot de passe" autocomplete="current-password">
+<button id="authButton" onclick="authenticate()">Se connecter</button>
+<button class="secondary" onclick="toggleAuth()">Créer un compte</button>
+<p class="muted">Pour une inscription immédiate, désactive Confirm email dans Supabase.</p>
+</section>
 
-  <section id="app" class="hidden">
-    <div class="card">
-      <div class="row">
-        <div>
-          <strong>Compte connecté</strong>
-          <div id="userEmail" class="muted"></div>
-        </div>
-        <button class="secondary" style="width:auto" onclick="logout()">Déconnexion</button>
-      </div>
-    </div>
+<section id="app" class="hidden">
+<div class="card">
+<div class="row">
+<div><strong>Compte connecté</strong><div id="userEmail" class="muted"></div></div>
+<button class="secondary" style="width:auto" onclick="logout()">Déconnexion</button>
+</div>
+</div>
 
-    <div id="message" class="hidden"></div>
+<div id="message" class="hidden"></div>
 
-    <div id="adminPanel" class="card hidden">
-      <h2>🛠️ Administration</h2>
-      <p>Tu es connectée en tant qu'administratrice.</p>
-      <button class="danger" onclick="resetVotes()">Remettre tous les votes et notes à zéro</button>
-      <p class="muted">Cette action efface les votes et notes de tous les utilisateurs, sans supprimer leurs comptes.</p>
-    </div>
+<div id="adminPanel" class="card hidden">
+<h2>🛠️ Administration</h2>
+<p>Compte administrateur reconnu.</p>
+<button class="danger" onclick="resetVotes()">Remettre tous les votes et notes à zéro</button>
+<p class="muted">Les comptes utilisateurs sont conservés.</p>
+</div>
 
-    <nav class="tabs">
-      <button class="active" onclick="showTab('popularite',this)">📊 Popularité</button>
-      <button onclick="showTab('nominations',this)">🛑 Nominations</button>
-      <button onclick="showTab('top3',this)">🏆 Top 3</button>
-      <button onclick="showTab('evaluations',this)">📝 Note des évaluations</button>
-      <button onclick="showTab('prime',this)">✏️ Note du prime</button>
-    </nav>
+<nav class="tabs">
+<button class="active" onclick="showTab('popularite',this)">📊 Popularité</button>
+<button onclick="showTab('nominations',this)">🛑 Nominations</button>
+<button onclick="showTab('top3',this)">🏆 Top 3</button>
+<button onclick="showTab('evaluations',this)">📝 Note des évaluations</button>
+<button onclick="showTab('prime',this)">✏️ Note du prime</button>
+</nav>
 
-    <section id="popularite" class="tab">
-      <div class="card">
-        <h2>📊 Vote de popularité</h2>
-        <p class="muted">Choisis une catégorie puis ton candidat préféré. Un vote par catégorie et par compte.</p>
-        <label>Catégorie</label>
-        <select id="voteCategory" onchange="updateCandidateChoices()">
-          <option value="garçon">Garçons</option>
-          <option value="fille">Filles</option>
-        </select>
-        <label>Candidat</label>
-        <select id="voteCandidate"></select>
-        <button onclick="castVote()">Valider mon vote</button>
-        <div id="voteStatus" class="muted"></div>
-      </div>
-      <div class="card">
-        <h2>Résultats de popularité</h2>
-        <div id="popularityResults">Chargement...</div>
-      </div>
-    </section>
+<section id="popularite" class="tab">
+<div class="card">
+<h2>📊 Vote de popularité</h2>
+<p class="muted">Un vote par catégorie et par compte.</p>
+<select id="voteCategory" onchange="updateCandidateChoices()">
+<option value="garçon">Garçons</option>
+<option value="fille">Filles</option>
+</select>
+<select id="voteCandidate"></select>
+<button onclick="castVote()">Valider mon vote</button>
+</div>
+<div class="card"><h2>Résultats de popularité</h2><div id="popularityResults">Chargement...</div></div>
+</section>
 
-    <section id="nominations" class="tab hidden">
-      <div class="card">
-        <h2>🛑 Nominations</h2>
-        <p>Classement des candidats selon les votes de popularité.</p>
-        <div id="nominationResults"></div>
-      </div>
-    </section>
+<section id="nominations" class="tab hidden">
+<div class="card"><h2>🛑 Nominations</h2><div id="nominationResults"></div></div>
+</section>
 
-    <section id="top3" class="tab hidden">
-      <div class="card">
-        <h2>🏆 Top 3</h2>
-        <div id="topResults"></div>
-      </div>
-    </section>
+<section id="top3" class="tab hidden">
+<div class="card"><h2>🏆 Top 3</h2><div id="topResults"></div></div>
+</section>
 
-    <section id="evaluations" class="tab hidden">
-      <div class="card">
-        <h2>📝 Note des évaluations</h2>
-        <p class="muted">Attribue une note sur 20 à chacun des 14 candidats. Une seule note par candidat et par compte.</p>
-        <div id="evaluationList"></div>
-      </div>
-      <div class="card">
-        <h2>Moyennes des évaluations</h2>
-        <div id="evaluationResults"></div>
-      </div>
-    </section>
+<section id="evaluations" class="tab hidden">
+<div class="card">
+<h2>📝 Note des évaluations</h2>
+<p class="muted">Une note sur 20 par candidat et par compte.</p>
+<div id="evaluationList"></div>
+</div>
+<div class="card"><h2>Moyennes des évaluations</h2><div id="evaluationResults"></div></div>
+</section>
 
-    <section id="prime" class="tab hidden">
-      <div class="card">
-        <h2>✏️ Note du prime</h2>
-        <p class="muted">Note chaque candidat sur 20. Une seule note par candidat et par compte.</p>
-        <div id="primeList"></div>
-      </div>
-      <div class="card">
-        <h2>Moyennes du prime</h2>
-        <div id="primeResults"></div>
-      </div>
-    </section>
-  </section>
+<section id="prime" class="tab hidden">
+<div class="card">
+<h2>✏️ Note du prime</h2>
+<p class="muted">Une note sur 20 par candidat et par compte.</p>
+<div id="primeList"></div>
+</div>
+<div class="card"><h2>Moyennes du prime</h2><div id="primeResults"></div></div>
+</section>
+</section>
 </main>
 
 <script>
+// IMPORTANT : remplace la clé ci-dessous par la Publishable key
+// actuelle affichée dans Supabase > Project Settings > API Keys.
 const SUPABASE_URL = "https://qdibctjpzozlpngvjsvc.supabase.co";
-const SUPABASE_KEY = "sb_publishable_X5SZIRRcg8wiW1GQTvCw_eZKRPCmA";
+const SUPABASE_KEY = "COLLE_ICI_TA_NOUVELLE_CLE_PUBLISHABLE";
 const ADMIN_EMAIL = "kelllymonroeeeee@gmail.com";
 
-const { createClient } = supabase;
-const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+if (!window.supabase) {
+  alert("Impossible de charger Supabase. Vérifie ta connexion Internet.");
+}
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const boys = ["Brieuc","Félix","Morgan","Cameron","Ydriss","Kylian"];
 const girls = ["Noémie","Maud","Leeloo","Tracy","Amel","Isabella","Melina","Zoe"];
-
-const evaluationCandidates = [
-  "Noémie","Maud","Brieuc","Leeloo","Tracy","Félix","Morgan",
-  "Cameron","Amel","Isabella","Ydriss","Melina","Kylian","Zoe"
-];
-
-const primeCandidates = [
-  "Noémie","Kylian","Melina","Brieuc","Leeloo","Tracy","Félix",
-  "Morgan","Cameron","Amel","Isabella","Zoe","Maud","Ydriss","Antoine"
-];
+const evaluationCandidates = ["Noémie","Maud","Brieuc","Leeloo","Tracy","Félix","Morgan","Cameron","Amel","Isabella","Ydriss","Melina","Kylian","Zoe"];
+const primeCandidates = ["Noémie","Kylian","Melina","Brieuc","Leeloo","Tracy","Félix","Morgan","Cameron","Amel","Isabella","Zoe","Maud","Ydriss","Antoine"];
 
 let currentUser = null;
 let isSignup = false;
-let myVotes = [];
-let myEvaluationRatings = [];
-let myPrimeRatings = [];
 
-function showMessage(text, ok=true) {
-  const box = document.getElementById("message");
-  box.textContent = text;
-  box.className = ok ? "good" : "bad";
-  box.classList.remove("hidden");
+function showMessage(text,ok=true){
+ const box=document.getElementById("message");
+ box.textContent=text;
+ box.className=ok?"good":"bad";
+ box.classList.remove("hidden");
 }
 
-function toggleAuth() {
-  isSignup = !isSignup;
-  document.getElementById("authTitle").textContent = isSignup ? "Créer un compte" : "Connexion";
-  document.getElementById("authButton").textContent = isSignup ? "Créer mon compte" : "Se connecter";
+function toggleAuth(){
+ isSignup=!isSignup;
+ document.getElementById("authTitle").textContent=isSignup?"Créer un compte":"Connexion";
+ document.getElementById("authButton").textContent=isSignup?"Créer mon compte":"Se connecter";
 }
 
-async function authenticate() {
-  const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value;
-  if (!email || !password) return alert("Entre ton e-mail et ton mot de passe.");
-
-  const button = document.getElementById("authButton");
-  button.disabled = true;
-
-  try {
-    let result;
-    if (isSignup) {
-      result = await db.auth.signUp({ email, password });
-    } else {
-      result = await db.auth.signInWithPassword({ email, password });
-    }
-
-    if (result.error) throw result.error;
-
-    if (isSignup && !result.data.session) {
-      alert("Compte créé. Vérifie les paramètres de confirmation e-mail dans Supabase, puis connecte-toi.");
-      return;
-    }
-
-    await startApp(result.data.user);
-  } catch (error) {
-    alert("Connexion impossible : " + error.message);
-  } finally {
-    button.disabled = false;
+async function authenticate(){
+ const email=document.getElementById("email").value.trim();
+ const password=document.getElementById("password").value;
+ if(!email||!password)return alert("Entre ton e-mail et ton mot de passe.");
+ const button=document.getElementById("authButton");
+ button.disabled=true;
+ try{
+  const result=isSignup
+   ? await db.auth.signUp({email,password})
+   : await db.auth.signInWithPassword({email,password});
+  if(result.error)throw result.error;
+  if(isSignup&&!result.data.session){
+   alert("Compte créé. Désactive Confirm email dans Supabase, puis connecte-toi.");
+   return;
   }
+  await startApp(result.data.user);
+ }catch(error){
+  alert("Connexion impossible : "+error.message);
+ }finally{button.disabled=false;}
 }
 
-async function logout() {
-  await db.auth.signOut();
-  currentUser = null;
-  document.getElementById("app").classList.add("hidden");
-  document.getElementById("authCard").classList.remove("hidden");
+async function logout(){
+ await db.auth.signOut();
+ currentUser=null;
+ document.getElementById("app").classList.add("hidden");
+ document.getElementById("authCard").classList.remove("hidden");
 }
 
-async function startApp(user) {
-  if (!user) return;
-  currentUser = user;
-  document.getElementById("authCard").classList.add("hidden");
-  document.getElementById("app").classList.remove("hidden");
-  document.getElementById("userEmail").textContent = user.email || "";
-  document.getElementById("adminPanel").classList.toggle(
-    "hidden",
-    (user.email || "").toLowerCase() !== ADMIN_EMAIL.toLowerCase()
-  );
-
-  updateCandidateChoices();
-  await refreshAll();
+async function startApp(user){
+ if(!user)return;
+ currentUser=user;
+ document.getElementById("authCard").classList.add("hidden");
+ document.getElementById("app").classList.remove("hidden");
+ document.getElementById("userEmail").textContent=user.email||"";
+ document.getElementById("adminPanel").classList.toggle(
+  "hidden",(user.email||"").toLowerCase()!==ADMIN_EMAIL.toLowerCase()
+ );
+ updateCandidateChoices();
+ await refreshAll();
 }
 
-async function resetVotes() {
-  if ((currentUser?.email || "").toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
-    return alert("Accès administrateur refusé.");
-  }
-
-  const confirmed = confirm(
-    "ATTENTION : tous les votes et toutes les notes de tous les utilisateurs seront supprimés. Continuer ?"
-  );
-  if (!confirmed) return;
-
-  const secondConfirm = confirm("Dernière confirmation : cette suppression est définitive. Confirmer ?");
-  if (!secondConfirm) return;
-
-  const { error } = await db.rpc("reset_all_votes");
-  if (error) {
-    alert("La remise à zéro a échoué : " + error.message);
-    return;
-  }
-
-  alert("Tous les votes et les notes ont été remis à zéro !");
-  await refreshAll();
+async function resetVotes(){
+ if((currentUser?.email||"").toLowerCase()!==ADMIN_EMAIL.toLowerCase()){
+  return alert("Accès administrateur refusé.");
+ }
+ if(!confirm("Supprimer définitivement tous les votes et notes ?"))return;
+ if(!confirm("Dernière confirmation : cette action est irréversible. Continuer ?"))return;
+ const {error}=await db.rpc("reset_all_votes");
+ if(error)return alert("Erreur de remise à zéro : "+error.message);
+ alert("Tous les votes et les notes ont été remis à zéro.");
+ await refreshAll();
 }
 
-function showTab(id, button) {
-  document.querySelectorAll(".tab").forEach(el => el.classList.add("hidden"));
-  document.getElementById(id).classList.remove("hidden");
-  document.querySelectorAll(".tabs button").forEach(el => el.classList.remove("active"));
-  button.classList.add("active");
+function showTab(id,button){
+ document.querySelectorAll(".tab").forEach(el=>el.classList.add("hidden"));
+ document.getElementById(id).classList.remove("hidden");
+ document.querySelectorAll(".tabs button").forEach(el=>el.classList.remove("active"));
+ button.classList.add("active");
 }
 
-function updateCandidateChoices() {
-  const category = document.getElementById("voteCategory").value;
-  const candidates = category === "garçon" ? boys : girls;
-  document.getElementById("voteCandidate").innerHTML =
-    candidates.map(name => `<option value="${escapeHTML(name)}">${escapeHTML(name)}</option>`).join("");
+function escapeHTML(value){
+ return String(value).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 }
 
-function escapeHTML(value) {
-  return String(value).replace(/[&<>"']/g, char => ({
-    "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;"
-  }[char]));
+function updateCandidateChoices(){
+ const category=document.getElementById("voteCategory").value;
+ const candidates=category==="garçon"?boys:girls;
+ document.getElementById("voteCandidate").innerHTML=
+ candidates.map(n=>`<option value="${escapeHTML(n)}">${escapeHTML(n)}</option>`).join("");
 }
 
-async function castVote() {
-  const category = document.getElementById("voteCategory").value;
-  const candidate = document.getElementById("voteCandidate").value;
-
-  const { error } = await db.from("votes").insert({
-    candidate,
-    category,
-    user_id: currentUser.id
-  });
-
-  if (error) {
-    if (error.code === "23505") {
-      alert("Tu as déjà voté dans cette catégorie. Tu ne peux voter qu'une fois.");
-    } else {
-      alert("Impossible d'enregistrer le vote : " + error.message);
-    }
-    return;
-  }
-
-  alert("Ton vote a bien été enregistré !");
-  await refreshAll();
+async function castVote(){
+ const category=document.getElementById("voteCategory").value;
+ const candidate=document.getElementById("voteCandidate").value;
+ const {error}=await db.from("votes").insert({candidate,category,user_id:currentUser.id});
+ if(error){
+  if(error.code==="23505")alert("Tu as déjà voté dans cette catégorie.");
+  else alert("Erreur : "+error.message);
+  return;
+ }
+ alert("Vote enregistré !");
+ await refreshAll();
 }
 
-async function loadVotes() {
-  const { data, error } = await db.from("votes").select("candidate, category, user_id");
-  if (error) throw error;
-
-  const results = {};
-  data.forEach(vote => {
-    const key = vote.category + "|" + vote.candidate;
-    results[key] = (results[key] || 0) + 1;
-  });
-
-  const renderCategory = category => {
-    const names = category === "garçon" ? boys : girls;
-    return names.map(name => {
-      const count = results[category + "|" + name] || 0;
-      return `<div class="candidate row"><span>${escapeHTML(name)}</span><strong>${count} vote(s)</strong></div>`;
-    }).join("");
-  };
-
-  document.getElementById("popularityResults").innerHTML =
-    "<h3>Garçons</h3>" + renderCategory("garçon") +
-    "<h3>Filles</h3>" + renderCategory("fille");
-
-  const all = [...boys, ...girls].map(name => ({
-    name,
-    count: results[(boys.includes(name) ? "garçon" : "fille") + "|" + name] || 0
-  })).sort((a,b) => b.count - a.count);
-
-  document.getElementById("nominationResults").innerHTML =
-    all.map((item,i) => `<div class="candidate row"><span>${i+1}. ${escapeHTML(item.name)}</span><strong>${item.count} vote(s)</strong></div>`).join("");
-
-  document.getElementById("topResults").innerHTML =
-    all.slice(0,3).map((item,i) =>
-      `<div class="candidate row"><strong>${["🥇","🥈","🥉"][i]} ${escapeHTML(item.name)}</strong><span>${item.count} vote(s)</span></div>`
-    ).join("");
+async function loadVotes(){
+ const {data,error}=await db.from("votes").select("candidate,category");
+ if(error)throw error;
+ const counts={};
+ data.forEach(v=>{
+  const key=v.category+"|"+v.candidate;
+  counts[key]=(counts[key]||0)+1;
+ });
+ const render=cat=>(cat==="garçon"?boys:girls).map(n=>
+  `<div class="candidate row"><span>${escapeHTML(n)}</span><strong>${counts[cat+"|"+n]||0} vote(s)</strong></div>`
+ ).join("");
+ document.getElementById("popularityResults").innerHTML=
+  "<h3>Garçons</h3>"+render("garçon")+"<h3>Filles</h3>"+render("fille");
+ const all=[...boys.map(n=>({name:n,count:counts["garçon|"+n]||0})),
+ ...girls.map(n=>({name:n,count:counts["fille|"+n]||0}))].sort((a,b)=>b.count-a.count);
+ document.getElementById("nominationResults").innerHTML=all.map((x,i)=>
+  `<div class="candidate row"><span>${i+1}. ${escapeHTML(x.name)}</span><strong>${x.count} vote(s)</strong></div>`
+ ).join("");
+ document.getElementById("topResults").innerHTML=all.slice(0,3).map((x,i)=>
+  `<div class="candidate row"><strong>${["🥇","🥈","🥉"][i]} ${escapeHTML(x.name)}</strong><span>${x.count} vote(s)</span></div>`
+ ).join("");
 }
 
-async function loadRatingSection(table, candidates, listId, resultsId, mineVariable) {
-  const { data, error } = await db.from(table).select("candidate, score, user_id");
-  if (error) throw error;
-
-  const mine = data.filter(row => row.user_id === currentUser.id);
-  if (table === "evaluation_ratings") myEvaluationRatings = mine;
-  else myPrimeRatings = mine;
-
-  const averages = {};
-  candidates.forEach(name => averages[name] = { total: 0, count: 0 });
-
-  data.forEach(row => {
-    if (!averages[row.candidate]) return;
-    averages[row.candidate].total += row.score;
-    averages[row.candidate].count++;
-  });
-
-  document.getElementById(listId).innerHTML = candidates.map(name => {
-    const alreadyRated = mine.some(row => row.candidate === name);
-    const existing = mine.find(row => row.candidate === name);
-    return `
-      <div class="candidate">
-        <div class="row">
-          <strong>${escapeHTML(name)}</strong>
-          ${alreadyRated ? `<span class="muted">Ta note : ${existing.score}/20</span>` : ""}
-        </div>
-        ${alreadyRated ? "" : `
-          <div class="row">
-            <input type="number" min="0" max="20" step="1"
-              id="${table}_${encodeURIComponent(name)}"
-              placeholder="Note sur 20" style="width:65%">
-            <button style="width:35%" onclick="saveRating('${table}','${escapeHTML(name)}')">Noter</button>
-          </div>
-        `}
-      </div>`;
-  }).join("");
-
-  document.getElementById(resultsId).innerHTML = candidates.map(name => {
-    const item = averages[name];
-    const average = item.count ? (item.total / item.count).toFixed(1) : "—";
-    return `<div class="candidate row"><span>${escapeHTML(name)} <span class="muted">(${item.count} note(s))</span></span><strong class="score">${average}/20</strong></div>`;
-  }).join("");
+async function loadRatingSection(table,candidates,listId,resultsId){
+ const {data,error}=await db.from(table).select("candidate,score,user_id");
+ if(error)throw error;
+ const mine=data.filter(x=>x.user_id===currentUser.id);
+ const averages={};
+ candidates.forEach(n=>averages[n]={total:0,count:0});
+ data.forEach(x=>{
+  if(!averages[x.candidate])return;
+  averages[x.candidate].total+=x.score;
+  averages[x.candidate].count++;
+ });
+ document.getElementById(listId).innerHTML=candidates.map(n=>{
+  const own=mine.find(x=>x.candidate===n);
+  return `<div class="candidate">
+   <div class="row"><strong>${escapeHTML(n)}</strong>${own?`<span class="muted">Ta note : ${own.score}/20</span>`:""}</div>
+   ${own?"":`<div class="row">
+    <input type="number" min="0" max="20" step="1" id="${table}_${encodeURIComponent(n)}" placeholder="Note sur 20" style="width:65%">
+    <button style="width:35%" onclick="saveRating('${table}','${escapeHTML(n)}')">Noter</button>
+   </div>`}
+  </div>`;
+ }).join("");
+ document.getElementById(resultsId).innerHTML=candidates.map(n=>{
+  const a=averages[n];
+  return `<div class="candidate row"><span>${escapeHTML(n)} (${a.count} note(s))</span><strong class="score">${a.count?(a.total/a.count).toFixed(1):"—"}/20</strong></div>`;
+ }).join("");
 }
 
-async function saveRating(table, candidate) {
-  const input = document.getElementById(table + "_" + encodeURIComponent(candidate));
-  const score = Number(input.value);
-
-  if (!Number.isInteger(score) || score < 0 || score > 20) {
-    return alert("Entre une note entière entre 0 et 20.");
-  }
-
-  const { error } = await db.from(table).insert({
-    candidate,
-    score,
-    user_id: currentUser.id
-  });
-
-  if (error) {
-    if (error.code === "23505") alert("Tu as déjà noté ce candidat.");
-    else alert("Erreur : " + error.message);
-    return;
-  }
-
-  alert("Note enregistrée !");
-  await refreshAll();
+async function saveRating(table,candidate){
+ const input=document.getElementById(table+"_"+encodeURIComponent(candidate));
+ const score=Number(input.value);
+ if(!Number.isInteger(score)||score<0||score>20)return alert("Entre une note entière de 0 à 20.");
+ const {error}=await db.from(table).insert({candidate,score,user_id:currentUser.id});
+ if(error){
+  if(error.code==="23505")alert("Tu as déjà noté ce candidat.");
+  else alert("Erreur : "+error.message);
+  return;
+ }
+ alert("Note enregistrée !");
+ await refreshAll();
 }
 
-async function refreshAll() {
-  try {
-    await loadVotes();
-    await loadRatingSection(
-      "evaluation_ratings", evaluationCandidates,
-      "evaluationList", "evaluationResults", "myEvaluationRatings"
-    );
-    await loadRatingSection(
-      "ratings", primeCandidates,
-      "primeList", "primeResults", "myPrimeRatings"
-    );
-  } catch (error) {
-    showMessage("Erreur de chargement : " + error.message, false);
-  }
+async function refreshAll(){
+ try{
+  await loadVotes();
+  await loadRatingSection("evaluation_ratings",evaluationCandidates,"evaluationList","evaluationResults");
+  await loadRatingSection("ratings",primeCandidates,"primeList","primeResults");
+ }catch(error){showMessage("Erreur de chargement : "+error.message,false);}
 }
 
-async function init() {
-  const { data, error } = await db.auth.getSession();
-  if (error) {
-    console.error(error);
-    return;
-  }
-  if (data.session?.user) await startApp(data.session.user);
+async function init(){
+ const {data,error}=await db.auth.getSession();
+ if(error){console.error(error);return;}
+ if(data.session?.user)await startApp(data.session.user);
 }
-
-db.auth.onAuthStateChange((event, session) => {
-  if (event === "SIGNED_IN" && session?.user && !currentUser) {
-    startApp(session.user);
-  }
-});
-
 init();
 </script>
 </body>
-</html>
-

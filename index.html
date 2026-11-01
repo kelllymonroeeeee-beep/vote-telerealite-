@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
@@ -8,28 +8,29 @@
 
 <style>
 * { box-sizing: border-box; }
+
 body {
   margin: 0;
-  padding: 16px;
+  padding: 14px;
   background: #10121b;
   color: white;
   font-family: Arial, sans-serif;
 }
+
 header { text-align: center; margin-bottom: 22px; }
-h1 { color: #f5c542; margin-bottom: 6px; }
+h1 { color: #f5c542; }
 h2 { text-align: center; }
-.subtitle { color: #bbb; }
 
 .panel {
-  max-width: 700px;
+  max-width: 800px;
   margin: 15px auto;
-  padding: 18px;
+  padding: 16px;
   background: #1c2030;
   border-radius: 14px;
 }
-input, button, select {
-  font: inherit;
-}
+
+input, select, button { font: inherit; }
+
 input {
   display: block;
   width: 100%;
@@ -41,187 +42,229 @@ input {
   color: #111 !important;
   -webkit-text-fill-color: #111 !important;
   caret-color: #111 !important;
-  opacity: 1 !important;
   font-size: 16px !important;
 }
+
 input::placeholder {
   color: #666 !important;
   -webkit-text-fill-color: #666 !important;
-  opacity: 1 !important;
 }
+
 button {
   border: 0;
   border-radius: 8px;
-  padding: 12px 16px;
+  padding: 12px 14px;
+  margin: 4px;
   background: #f5c542;
   color: #171717;
   font-weight: bold;
   cursor: pointer;
-  margin: 4px;
 }
+
 button:disabled {
   background: #777;
   color: #ddd;
-  cursor: not-allowed;
 }
-#auth-area input {
-  color: #111 !important;
-  background: #fff !important;
-  -webkit-text-fill-color: #111 !important;
+
+select {
+  padding: 10px;
+  border-radius: 8px;
+  background: white;
+  color: #111;
+  max-width: 100%;
 }
-#auth-message, .message {
-  text-align: center;
+
+.message {
   color: #f5c542;
+  text-align: center;
   overflow-wrap: anywhere;
 }
+
+.small { color: #aaa; font-size: 13px; }
+
 #site-area { display: none; }
+
 nav {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 6px;
-  max-width: 850px;
+  max-width: 1000px;
   margin: 15px auto;
+  gap: 5px;
 }
-nav button { flex: 1 1 140px; }
-.tab { display: none; max-width: 850px; margin: auto; }
+
+nav button { flex: 1 1 145px; }
+
+.tab {
+  display: none;
+  max-width: 900px;
+  margin: auto;
+}
+
 .tab.active { display: block; }
+
 .candidate {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
   gap: 10px;
-  padding: 13px;
+  padding: 12px;
   margin: 9px 0;
   border-radius: 10px;
   background: #292e40;
 }
+
 .candidate-info { min-width: 0; }
 .candidate-info strong { display: block; }
-.status { font-size: 12px; color: #ddd; margin-top: 5px; }
-.pop-yellow { border-left: 6px solid #f5c542; }
-.pop-blue { border-left: 6px solid #369bff; }
-.pop-red { border-left: 6px solid #e74c3c; }
+.status { font-size: 12px; margin-top: 5px; color: #ddd; }
+
+.pop-yellow, .rating-yellow { border-left: 6px solid #f5c542; }
+.pop-blue, .rating-blue { border-left: 6px solid #369bff; }
+.pop-red, .rating-red { border-left: 6px solid #e74c3c; }
 .pop-black { border-left: 6px solid #555; }
-.rating-yellow { border-left: 6px solid #f5c542; }
 .rating-green { border-left: 6px solid #27ae60; }
 .rating-orange { border-left: 6px solid #f39c12; }
-.rating-red { border-left: 6px solid #e74c3c; }
-.rating-blue { border-left: 6px solid #369bff; }
-.vote-count { color: #f5c542; font-weight: bold; white-space: nowrap; }
-.small { color: #aaa; font-size: 13px; }
-footer { text-align: center; color: #777; padding: 25px 0; }
-@media (max-width: 480px) {
-  body { padding: 10px; }
-  .panel { padding: 13px; }
-  .candidate { padding: 10px; }
-  button { padding: 11px 12px; }
+
+.rating-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+footer {
+  text-align: center;
+  color: #777;
+  padding: 25px 0;
+}
+
+@media(max-width: 480px) {
+  body { padding: 8px; }
+  .panel { padding: 11px; }
+  .candidate { padding: 9px; }
+  .candidate button { padding: 10px; }
+  nav button { flex-basis: 130px; }
 }
 </style>
 </head>
 
 <body>
+
 <header>
   <h1>📺 TÉLÉ RÉAL’STATS</h1>
-  <div class="subtitle">Les statistiques de l’aventure</div>
+  <p class="small">Les statistiques de l'aventure</p>
 </header>
 
 <section id="auth-area" class="panel">
   <h2>Connexion</h2>
-  <p class="small">Connecte-toi ou crée ton compte pour participer aux votes.</p>
+  <p class="small">Connecte-toi ou crée ton compte pour participer.</p>
+
   <input id="email" type="email" placeholder="Adresse e-mail" autocomplete="email">
   <input id="password" type="password" placeholder="Mot de passe" autocomplete="current-password">
+
   <button id="auth-submit" type="button">SE CONNECTER</button>
   <button id="auth-switch" type="button">CRÉER UN COMPTE</button>
-  <p id="auth-message"></p>
+
+  <p id="auth-message" class="message"></p>
 </section>
 
 <section id="site-area">
+
   <div class="panel" style="text-align:center">
     <span id="account-label"></span>
-    <button id="logout" type="button">DÉCONNEXION</button>
+    <button id="logout">DÉCONNEXION</button>
   </div>
 
   <nav>
     <button data-tab="popularity">📊 Popularité</button>
     <button data-tab="nominations">🛑 Nominations</button>
     <button data-tab="top3">⭐ Top 3</button>
-    <button data-tab="ratings">✏️ Notes du Public</button>
+    <button data-tab="evaluations">📝 Note des évaluations</button>
+    <button data-tab="prime">✏️ Note du prime</button>
   </nav>
 
-  <main>
-    <section id="popularity" class="tab active">
-      <div class="panel">
-        <h2>📊 POPULARITÉ — SEMAINE 4</h2>
-        <p class="small">Un vote par compte pour un garçon et un vote par compte pour une fille.</p>
-        <p id="vote-message" class="message"></p>
-        <div id="popularity-list"></div>
-      </div>
-    </section>
+  <section id="popularity" class="tab active">
+    <div class="panel">
+      <h2>📊 POPULARITÉ — SEMAINE 4</h2>
+      <p class="small">Un vote par compte pour un garçon et un vote par compte pour une fille.</p>
+      <p id="vote-message" class="message"></p>
+      <div id="popularity-list"></div>
+    </div>
+  </section>
 
-    <section id="nominations" class="tab">
-      <div class="panel">
-        <h2>🛑 NOMINATIONS — SEMAINE 4</h2>
-        <div class="candidate"><strong>1 — NON DÉFINI</strong></div>
-        <div class="candidate"><strong>2 — NON DÉFINI</strong></div>
-        <div class="candidate"><strong>3 — NON DÉFINI</strong></div>
-        <p class="message">Les Évaluations n’ont pas encore été faites.</p>
-      </div>
-    </section>
+  <section id="nominations" class="tab">
+    <div class="panel">
+      <h2>🛑 NOMINATIONS — SEMAINE 4</h2>
+      <div class="candidate"><strong>1 — NON DÉFINI</strong></div>
+      <div class="candidate"><strong>2 — NON DÉFINI</strong></div>
+      <div class="candidate"><strong>3 — NON DÉFINI</strong></div>
+      <p class="message">Les Évaluations n’ont pas encore été faites.</p>
+    </div>
+  </section>
 
-    <section id="top3" class="tab">
-      <div class="panel">
-        <h2>⭐ TOP 3 — SEMAINE 4</h2>
-        <p class="message">Les Évaluations n’ont pas encore été faites.</p>
-      </div>
-    </section>
+  <section id="top3" class="tab">
+    <div class="panel">
+      <h2>⭐ TOP 3 — SEMAINE 4</h2>
+      <p class="message">Les Évaluations n’ont pas encore été faites.</p>
+    </div>
+  </section>
 
-    <section id="ratings" class="tab">
-      <div class="panel">
-        <h2>✏️ NOTES DU PUBLIC — PRIME 4</h2>
-        <p class="small">Attribue une note sur 20 à chaque candidat.</p>
-        <p id="rating-message" class="message"></p>
-        <div id="ratings-list"></div>
-      </div>
-    </section>
-  </main>
+  <section id="evaluations" class="tab">
+    <div class="panel">
+      <h2>📝 NOTE DES ÉVALUATIONS</h2>
+      <p class="small">Attribue une note sur 20 à chacun des 14 candidats. Une seule note par compte et par candidat.</p>
+      <p id="evaluation-message" class="message"></p>
+      <div id="evaluation-list"></div>
+    </div>
+  </section>
+
+  <section id="prime" class="tab">
+    <div class="panel">
+      <h2>✏️ NOTE DU PRIME — PRIME 4</h2>
+      <p class="small">Attribue une note sur 20 à chaque candidat.</p>
+      <p id="prime-message" class="message"></p>
+      <div id="prime-list"></div>
+    </div>
+  </section>
+
 </section>
 
 <footer>Télé Réal’Stats</footer>
 
 <script>
 const SUPABASE_URL = "https://qdibctjpzozlpngvjsvc.supabase.co";
-const SUPABASE_KEY = "sb_publishable_X5SZIRRcg8wiInW1GQTvCw_eZKRPCmA";
-
-const authArea = document.getElementById("auth-area");
-const siteArea = document.getElementById("site-area");
-const authMessage = document.getElementById("auth-message");
+const SUPABASE_KEY = "sb_publishable_X5SZIRRcg8wiInW1GQTvCw_eKZRPCmA";
 
 let db = null;
 let currentUser = null;
 let creatingAccount = false;
 
-const candidates = [
-  {name:"Noémie", category:"fille", status:"IMMUNISÉE", style:"pop-yellow", vote:true},
-  {name:"Maud", category:"fille", status:"EN COMPÉTITION", style:"pop-blue", vote:true},
-  {name:"Brieuc", category:"garçon", status:"EN COMPÉTITION", style:"pop-blue", vote:true},
-  {name:"Leeloo", category:"fille", status:"EN COMPÉTITION", style:"pop-blue", vote:true},
-  {name:"Tracy", category:"fille", status:"EN COMPÉTITION", style:"pop-blue", vote:true},
-  {name:"Félix", category:"garçon", status:"EN COMPÉTITION", style:"pop-blue", vote:true},
-  {name:"Morgan", category:"garçon", status:"EN COMPÉTITION", style:"pop-blue", vote:true},
-  {name:"Cameron", category:"garçon", status:"EN COMPÉTITION", style:"pop-blue", vote:true},
-  {name:"Amel", category:"fille", status:"EN COMPÉTITION", style:"pop-blue", vote:true},
-  {name:"Isabella", category:"fille", status:"EN COMPÉTITION", style:"pop-blue", vote:true},
-  {name:"Ydriss", category:"garçon", status:"EN COMPÉTITION", style:"pop-blue", vote:true},
-  {name:"Melina", category:"fille", status:"EN COMPÉTITION", style:"pop-blue", vote:true},
-  {name:"Kylian", category:"garçon", status:"EN COMPÉTITION", style:"pop-blue", vote:true},
-  {name:"Zoe", category:"fille", status:"EN COMPÉTITION", style:"pop-blue", vote:true},
+const activeCandidates = [
+  {name:"Noémie", category:"fille", status:"IMMUNISÉE", style:"pop-yellow"},
+  {name:"Maud", category:"fille", status:"EN COMPÉTITION", style:"pop-blue"},
+  {name:"Brieuc", category:"garçon", status:"EN COMPÉTITION", style:"pop-blue"},
+  {name:"Leeloo", category:"fille", status:"EN COMPÉTITION", style:"pop-blue"},
+  {name:"Tracy", category:"fille", status:"EN COMPÉTITION", style:"pop-blue"},
+  {name:"Félix", category:"garçon", status:"EN COMPÉTITION", style:"pop-blue"},
+  {name:"Morgan", category:"garçon", status:"EN COMPÉTITION", style:"pop-blue"},
+  {name:"Cameron", category:"garçon", status:"EN COMPÉTITION", style:"pop-blue"},
+  {name:"Amel", category:"fille", status:"EN COMPÉTITION", style:"pop-blue"},
+  {name:"Isabella", category:"fille", status:"EN COMPÉTITION", style:"pop-blue"},
+  {name:"Ydriss", category:"garçon", status:"EN COMPÉTITION", style:"pop-blue"},
+  {name:"Melina", category:"fille", status:"EN COMPÉTITION", style:"pop-blue"},
+  {name:"Kylian", category:"garçon", status:"EN COMPÉTITION", style:"pop-blue"},
+  {name:"Zoe", category:"fille", status:"EN COMPÉTITION", style:"pop-blue"}
+];
+
+const popularityCandidates = [
+  ...activeCandidates,
   {name:"Antoine", category:"garçon", status:"ÉLIMINÉ", style:"pop-red", vote:false},
   {name:"Elija", category:"garçon", status:"ÉLIMINÉ", style:"pop-red", vote:false},
   {name:"Khalil", category:"garçon", status:"ABANDON", style:"pop-black", vote:false}
 ];
 
-const ratingCandidates = [
+const primeCandidates = [
   {name:"Noémie", style:"rating-yellow"},
   {name:"Kylian", style:"rating-green"},
   {name:"Melina", style:"rating-green"},
@@ -239,44 +282,52 @@ const ratingCandidates = [
   {name:"Antoine", style:"rating-red"}
 ];
 
-function showMessage(element, message) {
-  element.textContent = message;
+function message(id, text) {
+  document.getElementById(id).textContent = text;
 }
 
-function showSite(user) {
-  currentUser = user;
-  authArea.style.display = "none";
-  siteArea.style.display = "block";
-  document.getElementById("account-label").textContent = "Connecté : " + user.email;
-  loadVotes();
-  loadRatings();
+function escapeHtml(value) {
+  return String(value).replace(/[&<>"']/g, char => ({
+    "&":"&amp;", "<":"&lt;", ">":"&gt;",
+    '"':"&quot;", "'":"&#39;"
+  }[char]));
 }
 
 function showLogin() {
   currentUser = null;
-  siteArea.style.display = "none";
-  authArea.style.display = "block";
+  document.getElementById("site-area").style.display = "none";
+  document.getElementById("auth-area").style.display = "block";
+}
+
+function showSite(user) {
+  currentUser = user;
+  document.getElementById("auth-area").style.display = "none";
+  document.getElementById("site-area").style.display = "block";
+  document.getElementById("account-label").textContent =
+    "Connecté : " + (user.email || "");
+
+  loadVotes();
+  loadEvaluationRatings();
+  loadPrimeRatings();
 }
 
 async function start() {
   if (!window.supabase || !window.supabase.createClient) {
-    showMessage(authMessage, "Erreur de chargement. Recharge la page et réessaie.");
+    message("auth-message", "Erreur de chargement. Recharge la page.");
     return;
   }
 
   db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   const {data, error} = await db.auth.getSession();
+
   if (error) {
-    showMessage(authMessage, "Impossible de vérifier la connexion : " + error.message);
+    message("auth-message", error.message);
     return;
   }
 
-  if (data.session) {
-    showSite(data.session.user);
-  } else {
-    showLogin();
-  }
+  if (data.session) showSite(data.session.user);
+  else showLogin();
 
   db.auth.onAuthStateChange((_event, session) => {
     if (session) showSite(session.user);
@@ -286,57 +337,62 @@ async function start() {
 
 document.getElementById("auth-switch").addEventListener("click", () => {
   creatingAccount = !creatingAccount;
+
   document.getElementById("auth-submit").textContent =
     creatingAccount ? "CRÉER MON COMPTE" : "SE CONNECTER";
+
   document.getElementById("auth-switch").textContent =
     creatingAccount ? "J’AI DÉJÀ UN COMPTE" : "CRÉER UN COMPTE";
+
   document.getElementById("password").autocomplete =
     creatingAccount ? "new-password" : "current-password";
-  showMessage(authMessage, "");
+
+  message("auth-message", "");
 });
 
 document.getElementById("auth-submit").addEventListener("click", async () => {
   if (!db) {
-    showMessage(authMessage, "Le service de connexion n'est pas chargé. Recharge la page.");
+    message("auth-message", "Service de connexion indisponible. Recharge la page.");
     return;
   }
 
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value;
+  const button = document.getElementById("auth-submit");
 
   if (!email || !password) {
-    showMessage(authMessage, "Entre ton adresse e-mail et ton mot de passe.");
+    message("auth-message", "Entre ton e-mail et ton mot de passe.");
     return;
   }
 
   if (password.length < 6) {
-    showMessage(authMessage, "Le mot de passe doit contenir au moins 6 caractères.");
+    message("auth-message", "Le mot de passe doit contenir au moins 6 caractères.");
     return;
   }
 
-  const button = document.getElementById("auth-submit");
   button.disabled = true;
-  showMessage(authMessage, "Connexion en cours...");
+  message("auth-message", "Connexion en cours...");
 
   try {
-    let result;
-
-    if (creatingAccount) {
-      result = await db.auth.signUp({email, password});
-    } else {
-      result = await db.auth.signInWithPassword({email, password});
-    }
+    const result = creatingAccount
+      ? await db.auth.signUp({email, password})
+      : await db.auth.signInWithPassword({email, password});
 
     if (result.error) {
-      showMessage(authMessage, result.error.message);
-    } else if (creatingAccount && !result.data.session) {
-      showMessage(authMessage, "Compte créé ! Vérifie tes e-mails pour confirmer ton adresse.");
+      message("auth-message", result.error.message);
+    } else if (creatingAccount) {
+      if (result.data.session && result.data.user) {
+        message("auth-message", "Compte créé ! Tu es connecté.");
+        showSite(result.data.user);
+      } else {
+        message("auth-message", "Aucune session reçue. Vérifie que Confirm email est désactivé dans Supabase.");
+      }
     } else if (result.data.user) {
-      showMessage(authMessage, "Connexion réussie !");
+      message("auth-message", "Connexion réussie !");
       showSite(result.data.user);
     }
   } catch (error) {
-    showMessage(authMessage, "Erreur : " + error.message);
+    message("auth-message", "Erreur : " + error.message);
   } finally {
     button.disabled = false;
   }
@@ -349,50 +405,59 @@ document.getElementById("logout").addEventListener("click", async () => {
 
 document.querySelectorAll("nav button").forEach(button => {
   button.addEventListener("click", () => {
-    document.querySelectorAll(".tab").forEach(tab => tab.classList.remove("active"));
+    document.querySelectorAll(".tab").forEach(tab =>
+      tab.classList.remove("active")
+    );
     document.getElementById(button.dataset.tab).classList.add("active");
   });
 });
 
 async function loadVotes() {
   const list = document.getElementById("popularity-list");
-  list.innerHTML = "<p class='message'>Chargement des votes...</p>";
+  list.innerHTML = "<p class='message'>Chargement...</p>";
 
   const {data, error} = await db
     .from("votes")
     .select("candidate, category, user_id");
 
   if (error) {
-    list.innerHTML = "<p class='message'>Erreur de chargement des votes : " +
+    list.innerHTML = "<p class='message'>Erreur : " +
       escapeHtml(error.message) + "</p>";
     return;
   }
 
   const votes = data || [];
-  const total = votes.length;
   const counts = {};
-  votes.forEach(v => counts[v.candidate] = (counts[v.candidate] || 0) + 1);
 
+  votes.forEach(v => {
+    counts[v.candidate] = (counts[v.candidate] || 0) + 1;
+  });
+
+  const total = votes.length;
   const userVotes = votes.filter(v => v.user_id === currentUser.id);
+
   const alreadyVoted = {
     garçon: userVotes.some(v => v.category === "garçon"),
     fille: userVotes.some(v => v.category === "fille")
   };
 
-  document.getElementById("vote-message").textContent =
-    "Votes enregistrés : " + total +
+  message("vote-message",
+    "Total : " + total +
     " • Garçon : " + (alreadyVoted.garçon ? "déjà voté" : "disponible") +
-    " • Fille : " + (alreadyVoted.fille ? "déjà voté" : "disponible");
+    " • Fille : " + (alreadyVoted.fille ? "déjà voté" : "disponible")
+  );
 
   list.innerHTML = "";
 
-  candidates.forEach(candidate => {
+  popularityCandidates.forEach(candidate => {
     const count = counts[candidate.name] || 0;
     const percentage = total ? (count / total * 100).toFixed(1) : "0.0";
-    const blocked = !candidate.vote || alreadyVoted[candidate.category];
+    const canVote = candidate.vote !== false &&
+      !alreadyVoted[candidate.category];
 
     const card = document.createElement("div");
     card.className = "candidate " + candidate.style;
+
     card.innerHTML = `
       <div class="candidate-info">
         <strong>${escapeHtml(candidate.name)}</strong>
@@ -400,12 +465,15 @@ async function loadVotes() {
         <div class="small">${count} vote(s) • ${percentage}%</div>
       </div>
       <div>
-        ${candidate.vote
-          ? `<button ${blocked ? "disabled" : ""} data-vote="${escapeHtml(candidate.name)}">
-              ${alreadyVoted[candidate.category] ? "DÉJÀ VOTÉ" : "VOTER"}
-             </button>`
-          : `<span class="small">Non votable</span>`}
-      </div>`;
+        ${candidate.vote === false
+          ? "<span class='small'>Non votable</span>"
+          : `<button data-vote="${escapeHtml(candidate.name)}"
+              ${canVote ? "" : "disabled"}>
+              ${canVote ? "VOTER" : "DÉJÀ VOTÉ"}
+             </button>`}
+      </div>
+    `;
+
     list.appendChild(card);
   });
 
@@ -415,8 +483,8 @@ async function loadVotes() {
 }
 
 async function castVote(name) {
-  const candidate = candidates.find(c => c.name === name);
-  if (!candidate || !candidate.vote) return;
+  const candidate = activeCandidates.find(c => c.name === name);
+  if (!candidate) return;
 
   const {data: existing, error: readError} = await db
     .from("votes")
@@ -425,12 +493,12 @@ async function castVote(name) {
     .eq("category", candidate.category);
 
   if (readError) {
-    showMessage(document.getElementById("vote-message"), readError.message);
+    message("vote-message", readError.message);
     return;
   }
 
   if (existing && existing.length > 0) {
-    showMessage(document.getElementById("vote-message"), "Tu as déjà voté dans cette catégorie.");
+    message("vote-message", "Tu as déjà voté dans cette catégorie.");
     return;
   }
 
@@ -441,27 +509,51 @@ async function castVote(name) {
   });
 
   if (error) {
-    showMessage(document.getElementById("vote-message"),
+    message("vote-message",
       error.code === "23505"
         ? "Tu as déjà voté dans cette catégorie."
-        : "Erreur lors du vote : " + error.message);
+        : "Erreur : " + error.message);
     return;
   }
 
-  showMessage(document.getElementById("vote-message"), "Ton vote a bien été enregistré !");
+  message("vote-message", "Ton vote a bien été enregistré !");
   await loadVotes();
 }
 
-async function loadRatings() {
-  const list = document.getElementById("ratings-list");
+/* NOTATION DES ÉVALUATIONS */
+
+async function loadEvaluationRatings() {
+  await loadRatingSection({
+    table: "evaluation_ratings",
+    candidates: activeCandidates,
+    listId: "evaluation-list",
+    messageId: "evaluation-message",
+    userField: "user_id"
+  });
+}
+
+/* NOTATION DU PRIME */
+
+async function loadPrimeRatings() {
+  await loadRatingSection({
+    table: "ratings",
+    candidates: primeCandidates,
+    listId: "prime-list",
+    messageId: "prime-message",
+    userField: "voter_id"
+  });
+}
+
+async function loadRatingSection(config) {
+  const list = document.getElementById(config.listId);
   list.innerHTML = "<p class='message'>Chargement des notes...</p>";
 
   const {data, error} = await db
-    .from("ratings")
-    .select("candidate, score, voter_id");
+    .from(config.table)
+    .select("candidate, score, " + config.userField);
 
   if (error) {
-    list.innerHTML = "<p class='message'>Erreur de chargement des notes : " +
+    list.innerHTML = "<p class='message'>Erreur : " +
       escapeHtml(error.message) + "</p>";
     return;
   }
@@ -469,80 +561,98 @@ async function loadRatings() {
   const ratings = data || [];
   list.innerHTML = "";
 
-  ratingCandidates.forEach(candidate => {
+  config.candidates.forEach(candidate => {
     const ownRating = ratings.find(r =>
-      r.candidate === candidate.name && r.voter_id === currentUser.id
+      r.candidate === candidate.name &&
+      r[config.userField] === currentUser.id
     );
-    const candidateRatings = ratings.filter(r => r.candidate === candidate.name);
-    const average = candidateRatings.length
-      ? (candidateRatings.reduce((sum, r) => sum + Number(r.score), 0) /
-         candidateRatings.length).toFixed(1)
-      : "—";
 
-    const card = document.createElement("div");
-    card.className = "candidate " + candidate.style;
+    const candidateRatings = ratings.filter(r =>
+      r.candidate === candidate.name
+    );
+
+    const average = candidateRatings.length
+      ? (
+          candidateRatings.reduce((sum, r) => sum + Number(r.score), 0) /
+          candidateRatings.length
+        ).toFixed(1)
+      : "—";
 
     const options = Array.from({length:21}, (_, i) =>
       `<option value="${i}" ${ownRating && Number(ownRating.score) === i ? "selected" : ""}>${i}/20</option>`
     ).join("");
 
+    const card = document.createElement("div");
+    card.className = "candidate " + (candidate.style || "rating-blue");
+
     card.innerHTML = `
       <div class="candidate-info">
         <strong>${escapeHtml(candidate.name)}</strong>
-        <div class="small">Moyenne du public : ${average}/20</div>
+        <div class="small">Moyenne : ${average}/20</div>
       </div>
-      <div>
-        <select aria-label="Note pour ${escapeHtml(candidate.name)}" data-rating="${escapeHtml(candidate.name)}"
+      <div class="rating-actions">
+        <select data-rating="${escapeHtml(candidate.name)}"
           ${ownRating ? "disabled" : ""}>
           <option value="">Note</option>
           ${options}
         </select>
-        <button data-save-rating="${escapeHtml(candidate.name)}" ${ownRating ? "disabled" : ""}>
+        <button data-save-rating="${escapeHtml(candidate.name)}"
+          ${ownRating ? "disabled" : ""}>
           ${ownRating ? "NOTÉ" : "VALIDER"}
         </button>
-      </div>`;
+      </div>
+    `;
+
     list.appendChild(card);
   });
 
   list.querySelectorAll("[data-save-rating]").forEach(button => {
     button.addEventListener("click", () => {
       const name = button.dataset.saveRating;
-      const select = list.querySelector(`[data-rating="${CSS.escape(name)}"]`);
-      if (!select.value) {
-        showMessage(document.getElementById("rating-message"), "Choisis une note sur 20.");
+      const select = Array.from(
+        list.querySelectorAll("[data-rating]")
+      ).find(item => item.dataset.rating === name);
+
+      if (!select || select.value === "") {
+        message(config.messageId, "Choisis une note sur 20.");
         return;
       }
-      saveRating(name, Number(select.value));
+
+      saveRating(config, name, Number(select.value));
     });
   });
 }
 
-async function saveRating(name, score) {
-  const {error} = await db.from("ratings").insert({
+async function saveRating(config, name, score) {
+  const userData = {
     candidate: name,
-    score,
-    voter_id: currentUser.id
-  });
+    score: score
+  };
+
+  userData[config.userField] = currentUser.id;
+
+  const {error} = await db
+    .from(config.table)
+    .insert(userData);
 
   if (error) {
-    showMessage(document.getElementById("rating-message"),
+    message(config.messageId,
       error.code === "23505"
         ? "Tu as déjà noté ce candidat."
         : "Erreur : " + error.message);
     return;
   }
 
-  showMessage(document.getElementById("rating-message"), "Ta note a été enregistrée !");
-  await loadRatings();
-}
-
-function escapeHtml(value) {
-  return String(value).replace(/[&<>"']/g, char => ({
-    "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;"
-  }[char]));
+  message(config.messageId, "Ta note a été enregistrée !");
+  if (config.table === "evaluation_ratings") {
+    await loadEvaluationRatings();
+  } else {
+    await loadPrimeRatings();
+  }
 }
 
 start();
 </script>
+
 </body>
 </html>

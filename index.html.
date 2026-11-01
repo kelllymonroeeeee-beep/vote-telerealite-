@@ -3,8 +3,8 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Star Academy 2026 - Votes</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Star Academy - Cote de popularité</title>
 
 <style>
 * {
@@ -13,132 +13,182 @@
 
 body {
   margin: 0;
-  padding: 24px 14px;
-  background: #101018;
-  color: white;
+  padding: 20px 14px;
   font-family: Arial, sans-serif;
+  background: #000000;
+  color: #ffffff;
 }
 
 header {
   text-align: center;
-  margin-bottom: 28px;
+  padding: 15px 5px 25px;
 }
 
 h1 {
-  color: #f4d34f;
-  font-size: 30px;
-  margin-bottom: 8px;
+  margin: 0;
+  color: #ffffff;
+  font-size: 27px;
 }
 
-header p {
-  color: #aaa;
+.subtitle {
+  color: #bbbbbb;
+  margin-top: 9px;
+  font-size: 14px;
 }
 
-.container {
-  max-width: 600px;
+.candidates {
+  max-width: 650px;
   margin: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
 }
 
 .candidate {
+  background: #171717;
+  color: white;
+  border: 1px solid #303030;
+  border-radius: 15px;
+  padding: 14px;
   display: flex;
   align-items: center;
-  gap: 12px;
-  background: #1d1d29;
-  border: 1px solid #30303e;
-  border-radius: 14px;
-  padding: 13px;
-  margin-bottom: 10px;
+  gap: 13px;
 }
 
 .rank {
-  width: 30px;
-  color: #aaa;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  background: #333333;
+  color: white;
   font-weight: bold;
-  text-align: center;
+  font-size: 15px;
+}
+
+.info {
+  flex: 1;
+  min-width: 0;
 }
 
 .name {
-  flex: 1;
-  font-weight: bold;
+  font-weight: 800;
+  font-size: 16px;
+  margin-bottom: 8px;
 }
 
-.vote {
-  border: 0;
+.status {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 5px 9px;
   border-radius: 20px;
-  padding: 10px 15px;
-  font-weight: bold;
+}
+
+.status.immunise {
+  background: #fff0a8;
+  color: #9b7100;
+}
+
+.status.competition {
+  background: #d9f2ff;
+  color: #1685bd;
+}
+
+.status.elimine {
+  background: #ffe0e0;
+  color: #d32323;
+}
+
+.status.abandon {
+  background: #292929;
+  color: white;
+  border: 1px solid #777777;
+}
+
+.vote-button {
+  border: 0;
+  border-radius: 22px;
+  padding: 11px 15px;
+  min-width: 90px;
+  font-size: 13px;
+  font-weight: 900;
   cursor: pointer;
-  background: #8ee5ff;
-  color: #10202a;
 }
 
-.count {
-  color: #aaa;
+.vote-button.yellow {
+  background: #f2c500;
+  color: #292300;
+}
+
+.vote-button.blue {
+  background: #75cfff;
+  color: #073d59;
+}
+
+.vote-button.red {
+  background: #e53935;
+  color: white;
+}
+
+.vote-button.black {
+  background: #050505;
+  color: white;
+  border: 1px solid #777777;
+}
+
+.vote-button:disabled {
+  opacity: 0.65;
+  cursor: default;
+}
+
+.results {
+  margin: 10px 4px 0;
+}
+
+.result-line {
+  display: flex;
+  justify-content: space-between;
   font-size: 12px;
-  margin-top: 4px;
+  color: #bbbbbb;
+  margin-bottom: 6px;
 }
 
-/* NOÉMIE */
-.first {
-  border: 1px solid #e8c34b;
-  background: #292516;
+.progress {
+  height: 10px;
+  border-radius: 20px;
+  background: #333333;
+  overflow: hidden;
 }
 
-.first .name {
-  color: #f4d34f;
+.progress-bar {
+  height: 100%;
+  width: 0;
+  border-radius: 20px;
+  background: #8e9be8;
+  transition: width 0.3s ease;
 }
 
-.first .vote {
-  background: #f4d34f;
-  color: #171717;
-}
-
-.special {
-  color: #f4d34f;
-  font-size: 10px;
-  margin-left: 6px;
-}
-
-/* ANTOINE ET ELIJA */
-.eliminated .name {
-  color: #999;
-}
-
-.eliminated .vote {
-  background: #d94343;
-  color: white;
-}
-
-.elimination-tag {
-  color: #ff5555;
-  font-size: 10px;
-  margin-left: 6px;
-}
-
-/* KHALIL */
-.abandon .name {
-  color: #999;
-}
-
-.abandon .vote {
-  background: #000;
-  color: white;
-}
-
-.abandon-tag {
-  color: #fff;
-  background: #000;
-  font-size: 10px;
-  padding: 4px 6px;
-  border-radius: 5px;
-  margin-left: 6px;
-}
-
-footer {
+.total {
   text-align: center;
-  color: #777;
-  font-size: 12px;
+  color: #bbbbbb;
+  font-size: 13px;
   margin: 25px 0;
+}
+
+@media (max-width: 380px) {
+  .candidate {
+    gap: 8px;
+    padding: 11px 9px;
+  }
+
+  .vote-button {
+    min-width: 75px;
+    padding: 10px 9px;
+  }
 }
 </style>
 </head>
@@ -146,94 +196,149 @@ footer {
 <body>
 
 <header>
-  <h1>⭐ STAR ACADEMY ⭐</h1>
-  <p>SAISON 2026 — 2027</p>
-  <p>Vote pour ton candidat préféré !</p>
+  <h1>⭐ COTE DE POPULARITÉ ⭐</h1>
+  <div class="subtitle">
+    Star Academy • Vote pour ton candidat préféré
+  </div>
 </header>
 
-<main class="container" id="ranking"></main>
-
-<footer>
-  Classement des votes • Star Academy
-</footer>
+<main>
+  <div class="candidates" id="candidates"></div>
+  <div class="total" id="total">0 vote enregistré</div>
+</main>
 
 <script>
+
 const candidates = [
-  { name: "Noémie", status: "immune" },
-  { name: "Amel" },
-  { name: "Zoé" },
-  { name: "Isabella" },
-  { name: "Maud" },
-  { name: "Mélina" },
-  { name: "Tracy" },
-  { name: "Leeloo" },
-  { name: "Morgan" },
-  { name: "Cameron" },
-  { name: "Brieuc" },
-  { name: "Ydriss" },
-  { name: "Félix" },
-  { name: "Kylian" },
-  { name: "Antoine", status: "eliminated" },
-  { name: "Elija", status: "eliminated" },
-  { name: "Khalil", status: "abandon" }
+  { name: "Noémie", status: "IMMUNISÉE", type: "immunise" },
+  { name: "Maud", status: "EN COMPÉTITION", type: "competition" },
+  { name: "Brieuc", status: "EN COMPÉTITION", type: "competition" },
+  { name: "Leeloo", status: "EN COMPÉTITION", type: "competition" },
+  { name: "Tracy", status: "EN COMPÉTITION", type: "competition" },
+  { name: "Félix", status: "EN COMPÉTITION", type: "competition" },
+  { name: "Morgan", status: "EN COMPÉTITION", type: "competition" },
+  { name: "Cameron", status: "EN COMPÉTITION", type: "competition" },
+  { name: "Amel", status: "EN COMPÉTITION", type: "competition" },
+  { name: "Isabella", status: "EN COMPÉTITION", type: "competition" },
+  { name: "Ydriss", status: "EN COMPÉTITION", type: "competition" },
+  { name: "Melina", status: "EN COMPÉTITION", type: "competition" },
+  { name: "Kylian", status: "EN COMPÉTITION", type: "competition" },
+  { name: "Zoe", status: "EN COMPÉTITION", type: "competition" },
+  { name: "Antoine", status: "ÉLIMINÉ", type: "elimine" },
+  { name: "Elija", status: "ÉLIMINÉ", type: "elimine" },
+  { name: "Khalil", status: "ABANDON", type: "abandon" }
 ];
 
 const votes = {};
+let totalVotes = 0;
+let hasVoted = false;
+
 candidates.forEach(candidate => {
   votes[candidate.name] = 0;
 });
 
-function displayRanking() {
-  const ranking = document.getElementById("ranking");
-  ranking.innerHTML = "";
+function getButtonColor(type) {
+  if (type === "immunise") return "yellow";
+  if (type === "competition") return "blue";
+  if (type === "elimine") return "red";
+  return "black";
+}
+
+function render() {
+  const container = document.getElementById("candidates");
+  container.innerHTML = "";
 
   candidates.forEach((candidate, index) => {
+    const rank = index + 1;
+
+    const percentage = totalVotes === 0
+      ? 0
+      : (votes[candidate.name] / totalVotes) * 100;
+
     const card = document.createElement("div");
     card.className = "candidate";
 
-    if (candidate.status === "immune") {
-      card.classList.add("first");
-    }
+    const rankElement = document.createElement("div");
+    rankElement.className = "rank";
+    rankElement.textContent = rank;
 
-    if (candidate.status === "eliminated") {
-      card.classList.add("eliminated");
-    }
+    const info = document.createElement("div");
+    info.className = "info";
 
-    if (candidate.status === "abandon") {
-      card.classList.add("abandon");
-    }
+    const name = document.createElement("div");
+    name.className = "name";
+    name.textContent = candidate.name;
 
-    let label = "";
+    const status = document.createElement("span");
+    status.className = "status " + candidate.type;
+    status.textContent = candidate.status;
 
-    if (candidate.status === "immune") {
-      label = '<span class="special">IMMUNISÉE</span>';
-    } else if (candidate.status === "eliminated") {
-      label = '<span class="elimination-tag">ÉLIMINER</span>';
-    } else if (candidate.status === "abandon") {
-      label = '<span class="abandon-tag">ABANDON</span>';
-    }
+    info.appendChild(name);
+    info.appendChild(status);
 
-    card.innerHTML = `
-      <div class="rank">${index + 1}</div>
-      <div class="name">
-        ${candidate.name} ${label}
-        <div class="count">${votes[candidate.name]} vote(s)</div>
-      </div>
-      <button class="vote" type="button">VOTER</button>
-    `;
+    const button = document.createElement("button");
+    button.className =
+      "vote-button " + getButtonColor(candidate.type);
 
-    const button = card.querySelector("button");
+    button.textContent = hasVoted ? "VOTÉ" : "VOTER";
+    button.disabled = hasVoted;
 
     button.addEventListener("click", () => {
+      if (hasVoted) return;
+
       votes[candidate.name]++;
-      displayRanking();
+      totalVotes++;
+      hasVoted = true;
+
+      render();
     });
 
-    ranking.appendChild(card);
+    card.appendChild(rankElement);
+    card.appendChild(info);
+    card.appendChild(button);
+
+    const wrapper = document.createElement("div");
+    wrapper.appendChild(card);
+
+    const results = document.createElement("div");
+    results.className = "results";
+
+    const line = document.createElement("div");
+    line.className = "result-line";
+
+    const voteLabel = document.createElement("span");
+    voteLabel.textContent =
+      votes[candidate.name] + " vote(s)";
+
+    const percentLabel = document.createElement("span");
+    percentLabel.textContent =
+      percentage.toFixed(1) + " %";
+
+    line.appendChild(voteLabel);
+    line.appendChild(percentLabel);
+
+    const progress = document.createElement("div");
+    progress.className = "progress";
+
+    const bar = document.createElement("div");
+    bar.className = "progress-bar";
+    bar.style.width = percentage + "%";
+
+    progress.appendChild(bar);
+    results.appendChild(line);
+    results.appendChild(progress);
+
+    wrapper.appendChild(results);
+    container.appendChild(wrapper);
   });
+
+  document.getElementById("total").textContent =
+    totalVotes +
+    (totalVotes > 1 ? " votes enregistrés" : " vote enregistré");
 }
 
-displayRanking();
+render();
+
 </script>
 
 </body>

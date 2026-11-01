@@ -2,533 +2,547 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Télé Réal’Stats</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 * { box-sizing: border-box; }
-
 body {
   margin: 0;
-  font-family: Arial, sans-serif;
-  background: #101426;
+  padding: 16px;
+  background: #10121b;
   color: white;
+  font-family: Arial, sans-serif;
 }
+header { text-align: center; margin-bottom: 22px; }
+h1 { color: #f5c542; margin-bottom: 6px; }
+h2 { text-align: center; }
+.subtitle { color: #bbb; }
 
-header {
+.panel {
+  max-width: 700px;
+  margin: 15px auto;
+  padding: 18px;
+  background: #1c2030;
+  border-radius: 14px;
+}
+input, button, select {
+  font: inherit;
+}
+input {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  margin: 10px 0;
+  border: 1px solid #777;
+  border-radius: 8px;
+  background: white !important;
+  color: #111 !important;
+  -webkit-text-fill-color: #111 !important;
+  caret-color: #111 !important;
+  opacity: 1 !important;
+  font-size: 16px !important;
+}
+input::placeholder {
+  color: #666 !important;
+  -webkit-text-fill-color: #666 !important;
+  opacity: 1 !important;
+}
+button {
+  border: 0;
+  border-radius: 8px;
+  padding: 12px 16px;
+  background: #f5c542;
+  color: #171717;
+  font-weight: bold;
+  cursor: pointer;
+  margin: 4px;
+}
+button:disabled {
+  background: #777;
+  color: #ddd;
+  cursor: not-allowed;
+}
+#auth-area input {
+  color: #111 !important;
+  background: #fff !important;
+  -webkit-text-fill-color: #111 !important;
+}
+#auth-message, .message {
   text-align: center;
-  padding: 25px 12px;
-  background: linear-gradient(135deg, #192c59, #56318c);
+  color: #f5c542;
+  overflow-wrap: anywhere;
 }
-
-header h1 { margin: 0; font-size: 30px; }
-header p { color: #ddd; }
-
+#site-area { display: none; }
 nav {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 8px;
-  padding: 12px;
-  background: #171d34;
-  position: sticky;
-  top: 0;
-  z-index: 10;
+  gap: 6px;
+  max-width: 850px;
+  margin: 15px auto;
 }
-
-nav button {
-  border: 0;
-  border-radius: 20px;
-  padding: 11px 14px;
-  background: #303956;
-  color: white;
-  font-weight: bold;
-  cursor: pointer;
+nav button { flex: 1 1 140px; }
+.tab { display: none; max-width: 850px; margin: auto; }
+.tab.active { display: block; }
+.candidate {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 13px;
+  margin: 9px 0;
+  border-radius: 10px;
+  background: #292e40;
 }
-
-nav button.active {
-  background: #f1c84b;
-  color: #171717;
-}
-
-main {
-  max-width: 900px;
-  margin: auto;
-  padding: 18px;
-}
-
-.page { display: none; }
-.page.active { display: block; }
-
-h2 { text-align: center; }
-
-.subtitle {
-  text-align: center;
-  color: #c4c9dc;
-  margin-bottom: 22px;
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 13px;
-}
-
-.card {
-  border-radius: 15px;
-  padding: 17px;
-  border: 2px solid #398cff;
-  background: #203d70;
-}
-
-.card h3 { margin: 0 0 10px; font-size: 20px; }
-
-.status {
-  display: inline-block;
-  border-radius: 20px;
-  padding: 5px 10px;
-  font-size: 12px;
-  font-weight: bold;
-  background: rgba(0,0,0,.25);
-}
-
-.pop-blue {
-  background: #203d70;
-  border-color: #398cff;
-}
-
-.pop-yellow {
-  background: #55491e;
-  border-color: #f1d044;
-  color: white;
-}
-
-.pop-red {
-  background: #542b35;
-  border-color: #ff4055;
-}
-
-.pop-black {
-  background: #080808;
-  border-color: #777;
-}
-
-.rating-card {
-  margin-bottom: 13px;
-  background: #203d70;
-  border-color: #398cff;
-}
-
-.rating-red {
-  background: #542b35;
-  border-color: #ff4055;
-}
-
-.rating-yellow {
-  background: #55491e;
-  border-color: #f1d044;
-}
-
-.rating-green {
-  background: #194c38;
-  border-color: #36cf85;
-}
-
-.rating-orange {
-  background: #633b1c;
-  border-color: #ff9b36;
-}
-
-.vote, .rate-button {
-  width: 100%;
-  border: 0;
-  border-radius: 9px;
-  padding: 11px;
-  margin-top: 10px;
-  background: #f1c84b;
-  color: #171717;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-.vote:disabled, .rate-button:disabled {
-  opacity: .5;
-  cursor: not-allowed;
-}
-
-.progress {
-  height: 12px;
-  background: #101426;
-  border-radius: 20px;
-  overflow: hidden;
-  margin-top: 9px;
-}
-
-.progress span {
-  display: block;
-  height: 100%;
-  background: linear-gradient(90deg, #39a9ff, #9b6cff);
-}
-
-.count, .average {
-  font-weight: bold;
-  color: #f2d36c;
-}
-
-.rating-card select {
-  width: 100%;
-  padding: 10px;
-  margin-top: 8px;
-  border-radius: 8px;
-  background: #101426;
-  color: white;
-  border: 1px solid #65708c;
-}
-
-.message {
-  text-align: center;
-  background: #252e49;
-  border-radius: 12px;
-  padding: 20px;
-  color: #dce2f3;
-}
-
-.error {
-  color: #ff9c9c;
-  text-align: center;
-  padding: 12px;
-  overflow-wrap: anywhere;
-}
-
-footer {
-  text-align: center;
-  color: #8992ad;
-  padding: 25px;
-  font-size: 12px;
+.candidate-info { min-width: 0; }
+.candidate-info strong { display: block; }
+.status { font-size: 12px; color: #ddd; margin-top: 5px; }
+.pop-yellow { border-left: 6px solid #f5c542; }
+.pop-blue { border-left: 6px solid #369bff; }
+.pop-red { border-left: 6px solid #e74c3c; }
+.pop-black { border-left: 6px solid #555; }
+.rating-yellow { border-left: 6px solid #f5c542; }
+.rating-green { border-left: 6px solid #27ae60; }
+.rating-orange { border-left: 6px solid #f39c12; }
+.rating-red { border-left: 6px solid #e74c3c; }
+.rating-blue { border-left: 6px solid #369bff; }
+.vote-count { color: #f5c542; font-weight: bold; white-space: nowrap; }
+.small { color: #aaa; font-size: 13px; }
+footer { text-align: center; color: #777; padding: 25px 0; }
+@media (max-width: 480px) {
+  body { padding: 10px; }
+  .panel { padding: 13px; }
+  .candidate { padding: 10px; }
+  button { padding: 11px 12px; }
 }
 </style>
 </head>
 
 <body>
-
 <header>
   <h1>📺 TÉLÉ RÉAL’STATS</h1>
-  <p>Les statistiques du public — Semaine 4</p>
+  <div class="subtitle">Les statistiques de l’aventure</div>
 </header>
 
-<nav>
-  <button class="active" data-page="popularity">📊 Popularité</button>
-  <button data-page="nominations">🛑 Nominations</button>
-  <button data-page="top3">⭐ Top 3</button>
-  <button data-page="ratings">✏️ Notes du Public</button>
-</nav>
-
-<main>
-
-<section id="popularity" class="page active">
-  <h2>📊 POPULARITÉ — SEMAINE 4</h2>
-  <p class="subtitle">Vote pour ton candidat préféré !</p>
-  <div id="vote-total" class="subtitle">Chargement des votes...</div>
-  <div id="vote-error" class="error"></div>
-  <div id="candidates" class="grid"></div>
+<section id="auth-area" class="panel">
+  <h2>Connexion</h2>
+  <p class="small">Connecte-toi ou crée ton compte pour participer aux votes.</p>
+  <input id="email" type="email" placeholder="Adresse e-mail" autocomplete="email">
+  <input id="password" type="password" placeholder="Mot de passe" autocomplete="current-password">
+  <button id="auth-submit" type="button">SE CONNECTER</button>
+  <button id="auth-switch" type="button">CRÉER UN COMPTE</button>
+  <p id="auth-message"></p>
 </section>
 
-<section id="nominations" class="page">
-  <h2>🛑 NOMINATIONS — SEMAINE 4</h2>
-  <p class="subtitle">Les Évaluations n’ont pas encore été faites.</p>
-  <div class="message">
-    <h3>1 — NON DÉFINI</h3>
-    <h3>2 — NON DÉFINI</h3>
-    <h3>3 — NON DÉFINI</h3>
-    <p>Les nominations seront affichées après les évaluations.</p>
+<section id="site-area">
+  <div class="panel" style="text-align:center">
+    <span id="account-label"></span>
+    <button id="logout" type="button">DÉCONNEXION</button>
   </div>
+
+  <nav>
+    <button data-tab="popularity">📊 Popularité</button>
+    <button data-tab="nominations">🛑 Nominations</button>
+    <button data-tab="top3">⭐ Top 3</button>
+    <button data-tab="ratings">✏️ Notes du Public</button>
+  </nav>
+
+  <main>
+    <section id="popularity" class="tab active">
+      <div class="panel">
+        <h2>📊 POPULARITÉ — SEMAINE 4</h2>
+        <p class="small">Un vote par compte pour un garçon et un vote par compte pour une fille.</p>
+        <p id="vote-message" class="message"></p>
+        <div id="popularity-list"></div>
+      </div>
+    </section>
+
+    <section id="nominations" class="tab">
+      <div class="panel">
+        <h2>🛑 NOMINATIONS — SEMAINE 4</h2>
+        <div class="candidate"><strong>1 — NON DÉFINI</strong></div>
+        <div class="candidate"><strong>2 — NON DÉFINI</strong></div>
+        <div class="candidate"><strong>3 — NON DÉFINI</strong></div>
+        <p class="message">Les Évaluations n’ont pas encore été faites.</p>
+      </div>
+    </section>
+
+    <section id="top3" class="tab">
+      <div class="panel">
+        <h2>⭐ TOP 3 — SEMAINE 4</h2>
+        <p class="message">Les Évaluations n’ont pas encore été faites.</p>
+      </div>
+    </section>
+
+    <section id="ratings" class="tab">
+      <div class="panel">
+        <h2>✏️ NOTES DU PUBLIC — PRIME 4</h2>
+        <p class="small">Attribue une note sur 20 à chaque candidat.</p>
+        <p id="rating-message" class="message"></p>
+        <div id="ratings-list"></div>
+      </div>
+    </section>
+  </main>
 </section>
 
-<section id="top3" class="page">
-  <h2>⭐ TOP 3 — SEMAINE 4</h2>
-  <div class="message">
-    <p>Le classement du Top 3 sera affiché après les évaluations.</p>
-  </div>
-</section>
-
-<section id="ratings" class="page">
-  <h2>✏️ NOTES DU PUBLIC — PRIME 4</h2>
-  <p class="subtitle">Attribue une note sur 20 à chaque candidat.</p>
-  <div id="rating-error" class="error"></div>
-  <div id="rating-list">Chargement des notes...</div>
-</section>
-
-</main>
-
-<footer>Télé Réal’Stats — Site non officiel</footer>
+<footer>Télé Réal’Stats</footer>
 
 <script>
-/* CONNEXION SUPABASE */
 const SUPABASE_URL = "https://qdibctjpzozlpngvjsvc.supabase.co";
 const SUPABASE_KEY = "sb_publishable_X5SZIRRcg8wiInW1GQTvCw_eZKRPCmA";
 
+const authArea = document.getElementById("auth-area");
+const siteArea = document.getElementById("site-area");
+const authMessage = document.getElementById("auth-message");
+
 let db = null;
+let currentUser = null;
+let creatingAccount = false;
 
-try {
-  if (!window.supabase) {
-    throw new Error("La bibliothèque Supabase n'a pas chargé.");
-  }
-  db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-} catch (error) {
-  document.getElementById("vote-error").textContent = error.message;
-  document.getElementById("rating-error").textContent = error.message;
-}
-
-/* CANDIDATS ET COULEURS DE POPULARITÉ */
 const candidates = [
-  {name:"Noémie", status:"IMMUNISÉE", color:"pop-yellow", canVote:true},
-  {name:"Maud", status:"EN COMPÉTITION", color:"pop-blue", canVote:true},
-  {name:"Brieuc", status:"EN COMPÉTITION", color:"pop-blue", canVote:true},
-  {name:"Leeloo", status:"EN COMPÉTITION", color:"pop-blue", canVote:true},
-  {name:"Tracy", status:"EN COMPÉTITION", color:"pop-blue", canVote:true},
-  {name:"Félix", status:"EN COMPÉTITION", color:"pop-blue", canVote:true},
-  {name:"Morgan", status:"EN COMPÉTITION", color:"pop-blue", canVote:true},
-  {name:"Cameron", status:"EN COMPÉTITION", color:"pop-blue", canVote:true},
-  {name:"Amel", status:"EN COMPÉTITION", color:"pop-blue", canVote:true},
-  {name:"Isabella", status:"EN COMPÉTITION", color:"pop-blue", canVote:true},
-  {name:"Ydriss", status:"EN COMPÉTITION", color:"pop-blue", canVote:true},
-  {name:"Melina", status:"EN COMPÉTITION", color:"pop-blue", canVote:true},
-  {name:"Kylian", status:"EN COMPÉTITION", color:"pop-blue", canVote:true},
-  {name:"Zoe", status:"EN COMPÉTITION", color:"pop-blue", canVote:true},
-  {name:"Antoine", status:"ÉLIMINÉ", color:"pop-red", canVote:false, rank:"15e"},
-  {name:"Elija", status:"ÉLIMINÉ", color:"pop-red", canVote:false, rank:"16e"},
-  {name:"Khalil", status:"ABANDON", color:"pop-black", canVote:false, rank:"17e"}
+  {name:"Noémie", category:"fille", status:"IMMUNISÉE", style:"pop-yellow", vote:true},
+  {name:"Maud", category:"fille", status:"EN COMPÉTITION", style:"pop-blue", vote:true},
+  {name:"Brieuc", category:"garçon", status:"EN COMPÉTITION", style:"pop-blue", vote:true},
+  {name:"Leeloo", category:"fille", status:"EN COMPÉTITION", style:"pop-blue", vote:true},
+  {name:"Tracy", category:"fille", status:"EN COMPÉTITION", style:"pop-blue", vote:true},
+  {name:"Félix", category:"garçon", status:"EN COMPÉTITION", style:"pop-blue", vote:true},
+  {name:"Morgan", category:"garçon", status:"EN COMPÉTITION", style:"pop-blue", vote:true},
+  {name:"Cameron", category:"garçon", status:"EN COMPÉTITION", style:"pop-blue", vote:true},
+  {name:"Amel", category:"fille", status:"EN COMPÉTITION", style:"pop-blue", vote:true},
+  {name:"Isabella", category:"fille", status:"EN COMPÉTITION", style:"pop-blue", vote:true},
+  {name:"Ydriss", category:"garçon", status:"EN COMPÉTITION", style:"pop-blue", vote:true},
+  {name:"Melina", category:"fille", status:"EN COMPÉTITION", style:"pop-blue", vote:true},
+  {name:"Kylian", category:"garçon", status:"EN COMPÉTITION", style:"pop-blue", vote:true},
+  {name:"Zoe", category:"fille", status:"EN COMPÉTITION", style:"pop-blue", vote:true},
+  {name:"Antoine", category:"garçon", status:"ÉLIMINÉ", style:"pop-red", vote:false},
+  {name:"Elija", category:"garçon", status:"ÉLIMINÉ", style:"pop-red", vote:false},
+  {name:"Khalil", category:"garçon", status:"ABANDON", style:"pop-black", vote:false}
 ];
 
-/* CANDIDATS DES NOTES DU PUBLIC */
 const ratingCandidates = [
-  "Noémie", "Kylian", "Melina", "Brieuc", "Leeloo",
-  "Tracy", "Félix", "Morgan", "Cameron", "Amel",
-  "Isabella", "Zoe", "Maud", "Ydriss", "Antoine"
+  {name:"Noémie", style:"rating-yellow"},
+  {name:"Kylian", style:"rating-green"},
+  {name:"Melina", style:"rating-green"},
+  {name:"Brieuc", style:"rating-blue"},
+  {name:"Leeloo", style:"rating-blue"},
+  {name:"Tracy", style:"rating-blue"},
+  {name:"Félix", style:"rating-blue"},
+  {name:"Morgan", style:"rating-blue"},
+  {name:"Cameron", style:"rating-blue"},
+  {name:"Amel", style:"rating-blue"},
+  {name:"Isabella", style:"rating-blue"},
+  {name:"Zoe", style:"rating-blue"},
+  {name:"Maud", style:"rating-orange"},
+  {name:"Ydriss", style:"rating-orange"},
+  {name:"Antoine", style:"rating-red"}
 ];
 
-/* COULEURS DES NOTES DU PUBLIC */
-const ratingStyles = {
-  "Antoine": "rating-red",
-  "Noémie": "rating-yellow",
-  "Melina": "rating-green",
-  "Kylian": "rating-green",
-  "Maud": "rating-orange",
-  "Ydriss": "rating-orange"
-};
-
-/* IDENTIFIANT DU NAVIGATEUR */
-let voterId = localStorage.getItem("telerealstats_voter_id");
-
-if (!voterId) {
-  voterId = (window.crypto && crypto.randomUUID)
-    ? crypto.randomUUID()
-    : "voteur-" + Date.now() + "-" + Math.random().toString(36).slice(2);
-  localStorage.setItem("telerealstats_voter_id", voterId);
+function showMessage(element, message) {
+  element.textContent = message;
 }
 
-/* NAVIGATION */
+function showSite(user) {
+  currentUser = user;
+  authArea.style.display = "none";
+  siteArea.style.display = "block";
+  document.getElementById("account-label").textContent = "Connecté : " + user.email;
+  loadVotes();
+  loadRatings();
+}
+
+function showLogin() {
+  currentUser = null;
+  siteArea.style.display = "none";
+  authArea.style.display = "block";
+}
+
+async function start() {
+  if (!window.supabase || !window.supabase.createClient) {
+    showMessage(authMessage, "Erreur de chargement. Recharge la page et réessaie.");
+    return;
+  }
+
+  db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  const {data, error} = await db.auth.getSession();
+  if (error) {
+    showMessage(authMessage, "Impossible de vérifier la connexion : " + error.message);
+    return;
+  }
+
+  if (data.session) {
+    showSite(data.session.user);
+  } else {
+    showLogin();
+  }
+
+  db.auth.onAuthStateChange((_event, session) => {
+    if (session) showSite(session.user);
+    else showLogin();
+  });
+}
+
+document.getElementById("auth-switch").addEventListener("click", () => {
+  creatingAccount = !creatingAccount;
+  document.getElementById("auth-submit").textContent =
+    creatingAccount ? "CRÉER MON COMPTE" : "SE CONNECTER";
+  document.getElementById("auth-switch").textContent =
+    creatingAccount ? "J’AI DÉJÀ UN COMPTE" : "CRÉER UN COMPTE";
+  document.getElementById("password").autocomplete =
+    creatingAccount ? "new-password" : "current-password";
+  showMessage(authMessage, "");
+});
+
+document.getElementById("auth-submit").addEventListener("click", async () => {
+  if (!db) {
+    showMessage(authMessage, "Le service de connexion n'est pas chargé. Recharge la page.");
+    return;
+  }
+
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+
+  if (!email || !password) {
+    showMessage(authMessage, "Entre ton adresse e-mail et ton mot de passe.");
+    return;
+  }
+
+  if (password.length < 6) {
+    showMessage(authMessage, "Le mot de passe doit contenir au moins 6 caractères.");
+    return;
+  }
+
+  const button = document.getElementById("auth-submit");
+  button.disabled = true;
+  showMessage(authMessage, "Connexion en cours...");
+
+  try {
+    let result;
+
+    if (creatingAccount) {
+      result = await db.auth.signUp({email, password});
+    } else {
+      result = await db.auth.signInWithPassword({email, password});
+    }
+
+    if (result.error) {
+      showMessage(authMessage, result.error.message);
+    } else if (creatingAccount && !result.data.session) {
+      showMessage(authMessage, "Compte créé ! Vérifie tes e-mails pour confirmer ton adresse.");
+    } else if (result.data.user) {
+      showMessage(authMessage, "Connexion réussie !");
+      showSite(result.data.user);
+    }
+  } catch (error) {
+    showMessage(authMessage, "Erreur : " + error.message);
+  } finally {
+    button.disabled = false;
+  }
+});
+
+document.getElementById("logout").addEventListener("click", async () => {
+  if (db) await db.auth.signOut();
+  showLogin();
+});
+
 document.querySelectorAll("nav button").forEach(button => {
   button.addEventListener("click", () => {
-    document.querySelectorAll("nav button").forEach(b => b.classList.remove("active"));
-    document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
-    button.classList.add("active");
-    document.getElementById(button.dataset.page).classList.add("active");
+    document.querySelectorAll(".tab").forEach(tab => tab.classList.remove("active"));
+    document.getElementById(button.dataset.tab).classList.add("active");
   });
 });
 
-/* AFFICHAGE DE LA POPULARITÉ */
-function renderCandidates(votes) {
-  const container = document.getElementById("candidates");
+async function loadVotes() {
+  const list = document.getElementById("popularity-list");
+  list.innerHTML = "<p class='message'>Chargement des votes...</p>";
+
+  const {data, error} = await db
+    .from("votes")
+    .select("candidate, category, user_id");
+
+  if (error) {
+    list.innerHTML = "<p class='message'>Erreur de chargement des votes : " +
+      escapeHtml(error.message) + "</p>";
+    return;
+  }
+
+  const votes = data || [];
   const total = votes.length;
+  const counts = {};
+  votes.forEach(v => counts[v.candidate] = (counts[v.candidate] || 0) + 1);
 
-  document.getElementById("vote-total").textContent =
-    "Nombre total de votes : " + total;
+  const userVotes = votes.filter(v => v.user_id === currentUser.id);
+  const alreadyVoted = {
+    garçon: userVotes.some(v => v.category === "garçon"),
+    fille: userVotes.some(v => v.category === "fille")
+  };
 
-  container.innerHTML = "";
+  document.getElementById("vote-message").textContent =
+    "Votes enregistrés : " + total +
+    " • Garçon : " + (alreadyVoted.garçon ? "déjà voté" : "disponible") +
+    " • Fille : " + (alreadyVoted.fille ? "déjà voté" : "disponible");
+
+  list.innerHTML = "";
 
   candidates.forEach(candidate => {
-    const count = votes.filter(v => v.candidate === candidate.name).length;
-    const percentage = total ? count / total * 100 : 0;
+    const count = counts[candidate.name] || 0;
+    const percentage = total ? (count / total * 100).toFixed(1) : "0.0";
+    const blocked = !candidate.vote || alreadyVoted[candidate.category];
 
     const card = document.createElement("div");
-    card.className = "card " + candidate.color;
-
-    let content = `
-      <h3>${candidate.name}</h3>
-      <span class="status">${candidate.status}</span>
-    `;
-
-    if (candidate.canVote) {
-      content += `
-        <p class="count">${count} vote(s) — ${percentage.toFixed(1)} %</p>
-        <div class="progress">
-          <span style="width:${Math.min(percentage,100)}%"></span>
-        </div>
-        <button class="vote" data-candidate="${candidate.name}">VOTER</button>
-      `;
-    } else {
-      content += `<p>Position : ${candidate.rank}</p>`;
-    }
-
-    card.innerHTML = content;
-    container.appendChild(card);
+    card.className = "candidate " + candidate.style;
+    card.innerHTML = `
+      <div class="candidate-info">
+        <strong>${escapeHtml(candidate.name)}</strong>
+        <div class="status">${escapeHtml(candidate.status)}</div>
+        <div class="small">${count} vote(s) • ${percentage}%</div>
+      </div>
+      <div>
+        ${candidate.vote
+          ? `<button ${blocked ? "disabled" : ""} data-vote="${escapeHtml(candidate.name)}">
+              ${alreadyVoted[candidate.category] ? "DÉJÀ VOTÉ" : "VOTER"}
+             </button>`
+          : `<span class="small">Non votable</span>`}
+      </div>`;
+    list.appendChild(card);
   });
 
-  container.querySelectorAll(".vote").forEach(button => {
+  list.querySelectorAll("[data-vote]").forEach(button => {
+    button.addEventListener("click", () => castVote(button.dataset.vote));
+  });
+}
+
+async function castVote(name) {
+  const candidate = candidates.find(c => c.name === name);
+  if (!candidate || !candidate.vote) return;
+
+  const {data: existing, error: readError} = await db
+    .from("votes")
+    .select("id")
+    .eq("user_id", currentUser.id)
+    .eq("category", candidate.category);
+
+  if (readError) {
+    showMessage(document.getElementById("vote-message"), readError.message);
+    return;
+  }
+
+  if (existing && existing.length > 0) {
+    showMessage(document.getElementById("vote-message"), "Tu as déjà voté dans cette catégorie.");
+    return;
+  }
+
+  const {error} = await db.from("votes").insert({
+    candidate: candidate.name,
+    category: candidate.category,
+    user_id: currentUser.id
+  });
+
+  if (error) {
+    showMessage(document.getElementById("vote-message"),
+      error.code === "23505"
+        ? "Tu as déjà voté dans cette catégorie."
+        : "Erreur lors du vote : " + error.message);
+    return;
+  }
+
+  showMessage(document.getElementById("vote-message"), "Ton vote a bien été enregistré !");
+  await loadVotes();
+}
+
+async function loadRatings() {
+  const list = document.getElementById("ratings-list");
+  list.innerHTML = "<p class='message'>Chargement des notes...</p>";
+
+  const {data, error} = await db
+    .from("ratings")
+    .select("candidate, score, voter_id");
+
+  if (error) {
+    list.innerHTML = "<p class='message'>Erreur de chargement des notes : " +
+      escapeHtml(error.message) + "</p>";
+    return;
+  }
+
+  const ratings = data || [];
+  list.innerHTML = "";
+
+  ratingCandidates.forEach(candidate => {
+    const ownRating = ratings.find(r =>
+      r.candidate === candidate.name && r.voter_id === currentUser.id
+    );
+    const candidateRatings = ratings.filter(r => r.candidate === candidate.name);
+    const average = candidateRatings.length
+      ? (candidateRatings.reduce((sum, r) => sum + Number(r.score), 0) /
+         candidateRatings.length).toFixed(1)
+      : "—";
+
+    const card = document.createElement("div");
+    card.className = "candidate " + candidate.style;
+
+    const options = Array.from({length:21}, (_, i) =>
+      `<option value="${i}" ${ownRating && Number(ownRating.score) === i ? "selected" : ""}>${i}/20</option>`
+    ).join("");
+
+    card.innerHTML = `
+      <div class="candidate-info">
+        <strong>${escapeHtml(candidate.name)}</strong>
+        <div class="small">Moyenne du public : ${average}/20</div>
+      </div>
+      <div>
+        <select aria-label="Note pour ${escapeHtml(candidate.name)}" data-rating="${escapeHtml(candidate.name)}"
+          ${ownRating ? "disabled" : ""}>
+          <option value="">Note</option>
+          ${options}
+        </select>
+        <button data-save-rating="${escapeHtml(candidate.name)}" ${ownRating ? "disabled" : ""}>
+          ${ownRating ? "NOTÉ" : "VALIDER"}
+        </button>
+      </div>`;
+    list.appendChild(card);
+  });
+
+  list.querySelectorAll("[data-save-rating]").forEach(button => {
     button.addEventListener("click", () => {
-      castVote(button.dataset.candidate, button);
+      const name = button.dataset.saveRating;
+      const select = list.querySelector(`[data-rating="${CSS.escape(name)}"]`);
+      if (!select.value) {
+        showMessage(document.getElementById("rating-message"), "Choisis une note sur 20.");
+        return;
+      }
+      saveRating(name, Number(select.value));
     });
   });
 }
 
-/* CHARGEMENT DES VOTES */
-async function refreshVotes() {
-  if (!db) return;
-
-  const errorBox = document.getElementById("vote-error");
-  errorBox.textContent = "";
-
-  const {data, error} = await db
-    .from("votes")
-    .select("candidate");
-
-  if (error) {
-    errorBox.textContent = "Erreur de chargement des votes : " + error.message;
-    return;
-  }
-
-  renderCandidates(data || []);
-}
-
-/* ENREGISTREMENT D'UN VOTE */
-async function castVote(name, button) {
-  if (!db) return;
-
-  button.disabled = true;
-  button.textContent = "ENVOI...";
-
-  const {error} = await db
-    .from("votes")
-    .insert([{candidate:name}]);
-
-  if (error) {
-    document.getElementById("vote-error").textContent =
-      "Impossible d'enregistrer le vote : " + error.message;
-    button.disabled = false;
-    button.textContent = "VOTER";
-    return;
-  }
-
-  await refreshVotes();
-}
-
-/* CHARGEMENT DES NOTES */
-async function refreshRatings() {
-  if (!db) return;
-
-  const errorBox = document.getElementById("rating-error");
-  const list = document.getElementById("rating-list");
-
-  errorBox.textContent = "";
-  list.textContent = "Chargement des notes...";
-
-  const {data, error} = await db
-    .from("ratings")
-    .select("candidate,score,voter_id");
-
-  if (error) {
-    list.textContent = "";
-    errorBox.textContent = "Erreur de chargement des notes : " + error.message;
-    return;
-  }
-
-  list.innerHTML = "";
-
-  ratingCandidates.forEach(name => {
-    const notes = (data || []).filter(r => r.candidate === name);
-    const average = notes.length
-      ? notes.reduce((sum,r) => sum + Number(r.score),0) / notes.length
-      : null;
-
-    const alreadyRated = notes.some(r => r.voter_id === voterId);
-
-    const card = document.createElement("div");
-    card.className = "card rating-card " + (ratingStyles[name] || "");
-
-    const title = document.createElement("h3");
-    title.textContent = name;
-    card.appendChild(title);
-
-    const averageText = document.createElement("p");
-    averageText.className = "average";
-    averageText.textContent = average === null
-      ? "Moyenne : aucune note"
-      : "Moyenne : " + average.toFixed(1) + " / 20 (" + notes.length + " note(s))";
-    card.appendChild(averageText);
-
-    if (alreadyRated) {
-      const done = document.createElement("p");
-      done.textContent = "Tu as déjà noté ce candidat sur ce navigateur.";
-      card.appendChild(done);
-    } else {
-      const select = document.createElement("select");
-      select.setAttribute("aria-label", "Note pour " + name);
-
-      for (let score = 0; score <= 20; score++) {
-        const option = document.createElement("option");
-        option.value = score;
-        option.textContent = score + " / 20";
-        select.appendChild(option);
-      }
-
-      const button = document.createElement("button");
-      button.className = "rate-button";
-      button.textContent = "ENVOYER MA NOTE";
-
-      button.addEventListener("click", () => {
-        submitRating(name, Number(select.value), button);
-      });
-
-      card.appendChild(select);
-      card.appendChild(button);
-    }
-
-    list.appendChild(card);
+async function saveRating(name, score) {
+  const {error} = await db.from("ratings").insert({
+    candidate: name,
+    score,
+    voter_id: currentUser.id
   });
-}
-
-/* ENREGISTREMENT D'UNE NOTE */
-async function submitRating(name, score, button) {
-  if (!db) return;
-
-  button.disabled = true;
-  button.textContent = "ENVOI...";
-
-  const {error} = await db
-    .from("ratings")
-    .insert([{
-      candidate:name,
-      score:score,
-      voter_id:voterId
-    }]);
 
   if (error) {
-    document.getElementById("rating-error").textContent =
-      "Impossible d'enregistrer la note : " + error.message;
-    button.disabled = false;
-    button.textContent = "ENVOYER MA NOTE";
+    showMessage(document.getElementById("rating-message"),
+      error.code === "23505"
+        ? "Tu as déjà noté ce candidat."
+        : "Erreur : " + error.message);
     return;
   }
 
-  await refreshRatings();
+  showMessage(document.getElementById("rating-message"), "Ta note a été enregistrée !");
+  await loadRatings();
 }
 
-/* DÉMARRAGE */
-refreshVotes();
-refreshRatings();
-</script>
+function escapeHtml(value) {
+  return String(value).replace(/[&<>"']/g, char => ({
+    "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;"
+  }[char]));
+}
 
+start();
+</script>
 </body>
 </html>

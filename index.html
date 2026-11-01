@@ -7,126 +7,112 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{box-sizing:border-box}
-body{margin:0;background:#10101c;color:#fff;font-family:Arial,sans-serif}
-header{text-align:center;padding:25px 12px;background:linear-gradient(135deg,#6825a5,#d33b8d)}
-h1{margin:0;font-size:29px}
-header p{margin:8px 0 0}
-main{max-width:900px;margin:auto;padding:16px}
-.card{background:#1d1d30;border:1px solid #34344c;border-radius:15px;padding:17px;margin:14px 0}
-input,select,button{font-size:16px;border-radius:9px;padding:12px;width:100%;margin:6px 0}
-input,select{background:#fff;color:#111;border:1px solid #aaa}
-button{border:0;background:#a83cce;color:white;font-weight:bold;cursor:pointer}
-button:disabled{opacity:.5;cursor:not-allowed}
-button.secondary{background:#393951}
-button.danger{background:#c52e4b}
+body{margin:0;background:#101014;color:#f5f5f5;font-family:Arial,sans-serif}
+header{padding:25px 15px;text-align:center;background:#1b1b24;border-bottom:1px solid #333}
+h1{margin:0;font-size:27px}
+header p{color:#aaa;margin-bottom:0}
+main{max-width:850px;margin:auto;padding:15px}
+.panel{background:#1c1c25;border:1px solid #333;border-radius:14px;padding:17px;margin:15px 0}
+input,select{width:100%;padding:13px;margin:7px 0;background:white;color:#111;border:0;border-radius:8px;font-size:16px}
+button{padding:12px 15px;border:0;border-radius:8px;background:#e8c547;color:#111;font-weight:bold;cursor:pointer;margin:4px}
+button:disabled{opacity:.4;cursor:not-allowed}
 .tabs{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;margin:15px 0}
-.tabs button{font-size:13px;padding:12px 5px;margin:0}
-.tabs button.active{background:#e34c9a}
+.tabs button{background:#30303b;color:white}
+.tabs button.active{background:#e8c547;color:#111}
 .hidden{display:none!important}
-.muted{color:#b8b8cc;font-size:13px}
-.row{display:flex;justify-content:space-between;align-items:center;gap:10px}
-.score{font-size:22px;font-weight:bold;color:#ffc85b}
-.candidate{padding:12px 0;border-bottom:1px solid #39394c}
-.candidate:last-child{border:0}
-#message{padding:10px;border-radius:8px;margin:10px 0}
-.good{background:#174c36}
-.bad{background:#642c37}
+.person{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px;margin:7px 0;background:#292934;border-radius:9px}
+.person small{display:block;color:#aaa;margin-top:4px}
+.rank{font-weight:bold;color:#e8c547}
+.immune{color:#111;background:#f4d34f;padding:5px 9px;border-radius:6px;font-size:12px;font-weight:bold}
+.immunised{border:1px solid #e8c547;background:#40391f}
+.impossible{color:#ff5555;font-weight:bold}
+.impossible.black{color:#111;background:#aaa;padding:5px 8px;border-radius:5px}
+.muted{text-align:center;color:#888;padding:30px 10px;font-weight:bold}
+.result{color:#ddd;line-height:1.7}
+.notice{color:#aaa;font-size:13px}
+#status{padding:10px;color:#e8c547;white-space:pre-wrap}
+.score{max-width:100px}
 </style>
 </head>
 <body>
 <header>
-<h1>⭐ Télé Réal’Stats</h1>
+<h1>📺 Télé Réal’Stats</h1>
 <p>Les statistiques de la télé-réalité</p>
 </header>
 
 <main>
-<section id="authCard" class="card">
-<h2 id="authTitle">Connexion</h2>
-<input id="email" type="email" placeholder="Adresse e-mail" autocomplete="email">
-<input id="password" type="password" placeholder="Mot de passe" autocomplete="current-password">
-<button id="authButton" onclick="authenticate()">Se connecter</button>
-<button class="secondary" onclick="toggleAuth()">Créer un compte</button>
-<p class="muted">Pour une inscription immédiate, désactive Confirm email dans Supabase.</p>
+<section class="panel" id="authPanel">
+<h2>Connexion</h2>
+<input id="email" type="email" placeholder="Adresse e-mail">
+<input id="password" type="password" placeholder="Mot de passe">
+<button onclick="signIn()">Se connecter</button>
+<button onclick="signUp()">Créer un compte</button>
+<p class="notice">Connecte-toi pour voter et noter les candidats.</p>
 </section>
 
-<section id="app" class="hidden">
-<div class="card">
-<div class="row">
-<div><strong>Compte connecté</strong><div id="userEmail" class="muted"></div></div>
-<button class="secondary" style="width:auto" onclick="logout()">Déconnexion</button>
-</div>
-</div>
+<section class="panel hidden" id="accountPanel">
+<span id="accountInfo"></span>
+<button onclick="signOut()">Déconnexion</button>
+</section>
 
-<div id="message" class="hidden"></div>
-
-<div id="adminPanel" class="card hidden">
-<h2>🛠️ Administration</h2>
-<p>Compte administrateur reconnu.</p>
-<button class="danger" onclick="resetVotes()">Remettre tous les votes et notes à zéro</button>
-<p class="muted">Les comptes utilisateurs sont conservés.</p>
-</div>
-
+<div id="app" class="hidden">
 <nav class="tabs">
-<button class="active" onclick="showTab('popularite',this)">📊 Popularité</button>
-<button onclick="showTab('nominations',this)">🛑 Nominations</button>
-<button onclick="showTab('top3',this)">🏆 Top 3</button>
-<button onclick="showTab('evaluations',this)">📝 Note des évaluations</button>
-<button onclick="showTab('prime',this)">✏️ Note du prime</button>
+<button class="active" data-tab="popularity" onclick="showTab('popularity',this)">📊 Popularité</button>
+<button data-tab="nominations" onclick="showTab('nominations',this)">🛑 Nominations</button>
+<button data-tab="top3" onclick="showTab('top3',this)">🏆 Top 3</button>
+<button data-tab="evaluations" onclick="showTab('evaluations',this)">📝 Note des évaluations</button>
+<button data-tab="prime" onclick="showTab('prime',this)">✏️ Note du prime</button>
 </nav>
 
-<section id="popularite" class="tab">
-<div class="card">
-<h2>📊 Vote de popularité</h2>
-<p class="muted">Un vote par catégorie et par compte.</p>
-<select id="voteCategory" onchange="updateCandidateChoices()">
-<option value="garçon">Garçons</option>
-<option value="fille">Filles</option>
-</select>
-<select id="voteCandidate"></select>
-<button onclick="castVote()">Valider mon vote</button>
-</div>
-<div class="card"><h2>Résultats de popularité</h2><div id="popularityResults">Chargement...</div></div>
+<section id="popularity" class="panel">
+<h2>📊 Côte de popularité</h2>
+<p class="notice">Un vote pour un garçon et un vote pour une fille par compte.</p>
+<h3>Garçons</h3>
+<div id="boys"></div>
+<h3>Filles</h3>
+<div id="girls"></div>
+<p class="notice">Antoine, Elija et Khalil ne sont pas disponibles au vote.</p>
 </section>
 
-<section id="nominations" class="tab hidden">
-<div class="card"><h2>🛑 Nominations</h2><div id="nominationResults"></div></div>
+<section id="nominations" class="panel hidden">
+<h2>🛑 Nominations</h2>
+<div class="muted">Résultats après les évaluations</div>
 </section>
 
-<section id="top3" class="tab hidden">
-<div class="card"><h2>🏆 Top 3</h2><div id="topResults"></div></div>
+<section id="top3" class="panel hidden">
+<h2>🏆 Top 3</h2>
+<div class="muted">Résultats après les évaluations</div>
 </section>
 
-<section id="evaluations" class="tab hidden">
-<div class="card">
+<section id="evaluations" class="panel hidden">
 <h2>📝 Note des évaluations</h2>
-<p class="muted">Une note sur 20 par candidat et par compte.</p>
-<div id="evaluationList"></div>
+<p class="notice">Attribue une note sur 20 à chaque candidat. Une seule note par candidat et par compte.</p>
+<div id="evaluationForm"></div>
+<div id="evaluationResults" class="hidden">
+<h3>Résultats des évaluations</h3>
+<div id="evaluationStats" class="result"></div>
 </div>
-<div class="card"><h2>Moyennes des évaluations</h2><div id="evaluationResults"></div></div>
 </section>
 
-<section id="prime" class="tab hidden">
-<div class="card">
+<section id="prime" class="panel hidden">
 <h2>✏️ Note du prime</h2>
-<p class="muted">Une note sur 20 par candidat et par compte.</p>
-<div id="primeList"></div>
+<p class="notice">Attribue une note sur 20 à chaque candidat. Une seule note par candidat et par compte.</p>
+<div id="primeForm"></div>
+<div id="primeResults" class="hidden">
+<h3>Résultats du prime</h3>
+<div id="primeStats" class="result"></div>
 </div>
-<div class="card"><h2>Moyennes du prime</h2><div id="primeResults"></div></div>
 </section>
-</section>
+</div>
+<div id="status"></div>
 </main>
 
 <script>
-// IMPORTANT : remplace la clé ci-dessous par la Publishable key
-// actuelle affichée dans Supabase > Project Settings > API Keys.
 const SUPABASE_URL = "https://qdibctjpzozlpngvjsvc.supabase.co";
-const SUPABASE_KEY = "sb_publishable_X5SZIRRcg8wiInW1GQTvCw_eZKRPCmA";
+const SUPABASE_KEY = "COLLE_ICI_TA_PUBLISHABLE_KEY";
 const ADMIN_EMAIL = "kelllymonroeeeee@gmail.com";
 
-if (!window.supabase) {
-  alert("Impossible de charger Supabase. Vérifie ta connexion Internet.");
-}
-const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const db = window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
 const boys = ["Brieuc","Félix","Morgan","Cameron","Ydriss","Kylian"];
 const girls = ["Noémie","Maud","Leeloo","Tracy","Amel","Isabella","Melina","Zoe"];
@@ -134,182 +120,247 @@ const evaluationCandidates = ["Noémie","Maud","Brieuc","Leeloo","Tracy","Félix
 const primeCandidates = ["Noémie","Kylian","Melina","Brieuc","Leeloo","Tracy","Félix","Morgan","Cameron","Amel","Isabella","Zoe","Maud","Ydriss","Antoine"];
 
 let currentUser = null;
-let isSignup = false;
+let userVotes = [];
+let isAdmin = false;
 
-function showMessage(text,ok=true){
- const box=document.getElementById("message");
- box.textContent=text;
- box.className=ok?"good":"bad";
- box.classList.remove("hidden");
+function message(txt){
+  document.getElementById("status").textContent=txt;
 }
 
-function toggleAuth(){
- isSignup=!isSignup;
- document.getElementById("authTitle").textContent=isSignup?"Créer un compte":"Connexion";
- document.getElementById("authButton").textContent=isSignup?"Créer mon compte":"Se connecter";
+async function signIn(){
+  const email=document.getElementById("email").value.trim();
+  const password=document.getElementById("password").value;
+  const {error}=await db.auth.signInWithPassword({email,password});
+  if(error){message(error.message);return;}
+  await init();
 }
 
-async function authenticate(){
- const email=document.getElementById("email").value.trim();
- const password=document.getElementById("password").value;
- if(!email||!password)return alert("Entre ton e-mail et ton mot de passe.");
- const button=document.getElementById("authButton");
- button.disabled=true;
- try{
-  const result=isSignup
-   ? await db.auth.signUp({email,password})
-   : await db.auth.signInWithPassword({email,password});
-  if(result.error)throw result.error;
-  if(isSignup&&!result.data.session){
-   alert("Compte créé. Désactive Confirm email dans Supabase, puis connecte-toi.");
-   return;
-  }
-  await startApp(result.data.user);
- }catch(error){
-  alert("Connexion impossible : "+error.message);
- }finally{button.disabled=false;}
+async function signUp(){
+  const email=document.getElementById("email").value.trim();
+  const password=document.getElementById("password").value;
+  if(password.length<6){message("Le mot de passe doit contenir au moins 6 caractères.");return;}
+  const {data,error}=await db.auth.signUp({email,password});
+  if(error){message(error.message);return;}
+  if(data.session){await init();}
+  else{message("Compte créé. Vérifie tes e-mails si une confirmation est demandée.");}
 }
 
-async function logout(){
- await db.auth.signOut();
- currentUser=null;
- document.getElementById("app").classList.add("hidden");
- document.getElementById("authCard").classList.remove("hidden");
-}
-
-async function startApp(user){
- if(!user)return;
- currentUser=user;
- document.getElementById("authCard").classList.add("hidden");
- document.getElementById("app").classList.remove("hidden");
- document.getElementById("userEmail").textContent=user.email||"";
- document.getElementById("adminPanel").classList.toggle(
-  "hidden",(user.email||"").toLowerCase()!==ADMIN_EMAIL.toLowerCase()
- );
- updateCandidateChoices();
- await refreshAll();
-}
-
-async function resetVotes(){
- if((currentUser?.email||"").toLowerCase()!==ADMIN_EMAIL.toLowerCase()){
-  return alert("Accès administrateur refusé.");
- }
- if(!confirm("Supprimer définitivement tous les votes et notes ?"))return;
- if(!confirm("Dernière confirmation : cette action est irréversible. Continuer ?"))return;
- const {error}=await db.rpc("reset_all_votes");
- if(error)return alert("Erreur de remise à zéro : "+error.message);
- alert("Tous les votes et les notes ont été remis à zéro.");
- await refreshAll();
-}
-
-function showTab(id,button){
- document.querySelectorAll(".tab").forEach(el=>el.classList.add("hidden"));
- document.getElementById(id).classList.remove("hidden");
- document.querySelectorAll(".tabs button").forEach(el=>el.classList.remove("active"));
- button.classList.add("active");
-}
-
-function escapeHTML(value){
- return String(value).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-}
-
-function updateCandidateChoices(){
- const category=document.getElementById("voteCategory").value;
- const candidates=category==="garçon"?boys:girls;
- document.getElementById("voteCandidate").innerHTML=
- candidates.map(n=>`<option value="${escapeHTML(n)}">${escapeHTML(n)}</option>`).join("");
-}
-
-async function castVote(){
- const category=document.getElementById("voteCategory").value;
- const candidate=document.getElementById("voteCandidate").value;
- const {error}=await db.from("votes").insert({candidate,category,user_id:currentUser.id});
- if(error){
-  if(error.code==="23505")alert("Tu as déjà voté dans cette catégorie.");
-  else alert("Erreur : "+error.message);
-  return;
- }
- alert("Vote enregistré !");
- await refreshAll();
-}
-
-async function loadVotes(){
- const {data,error}=await db.from("votes").select("candidate,category");
- if(error)throw error;
- const counts={};
- data.forEach(v=>{
-  const key=v.category+"|"+v.candidate;
-  counts[key]=(counts[key]||0)+1;
- });
- const render=cat=>(cat==="garçon"?boys:girls).map(n=>
-  `<div class="candidate row"><span>${escapeHTML(n)}</span><strong>${counts[cat+"|"+n]||0} vote(s)</strong></div>`
- ).join("");
- document.getElementById("popularityResults").innerHTML=
-  "<h3>Garçons</h3>"+render("garçon")+"<h3>Filles</h3>"+render("fille");
- const all=[...boys.map(n=>({name:n,count:counts["garçon|"+n]||0})),
- ...girls.map(n=>({name:n,count:counts["fille|"+n]||0}))].sort((a,b)=>b.count-a.count);
- document.getElementById("nominationResults").innerHTML=all.map((x,i)=>
-  `<div class="candidate row"><span>${i+1}. ${escapeHTML(x.name)}</span><strong>${x.count} vote(s)</strong></div>`
- ).join("");
- document.getElementById("topResults").innerHTML=all.slice(0,3).map((x,i)=>
-  `<div class="candidate row"><strong>${["🥇","🥈","🥉"][i]} ${escapeHTML(x.name)}</strong><span>${x.count} vote(s)</span></div>`
- ).join("");
-}
-
-async function loadRatingSection(table,candidates,listId,resultsId){
- const {data,error}=await db.from(table).select("candidate,score,user_id");
- if(error)throw error;
- const mine=data.filter(x=>x.user_id===currentUser.id);
- const averages={};
- candidates.forEach(n=>averages[n]={total:0,count:0});
- data.forEach(x=>{
-  if(!averages[x.candidate])return;
-  averages[x.candidate].total+=x.score;
-  averages[x.candidate].count++;
- });
- document.getElementById(listId).innerHTML=candidates.map(n=>{
-  const own=mine.find(x=>x.candidate===n);
-  return `<div class="candidate">
-   <div class="row"><strong>${escapeHTML(n)}</strong>${own?`<span class="muted">Ta note : ${own.score}/20</span>`:""}</div>
-   ${own?"":`<div class="row">
-    <input type="number" min="0" max="20" step="1" id="${table}_${encodeURIComponent(n)}" placeholder="Note sur 20" style="width:65%">
-    <button style="width:35%" onclick="saveRating('${table}','${escapeHTML(n)}')">Noter</button>
-   </div>`}
-  </div>`;
- }).join("");
- document.getElementById(resultsId).innerHTML=candidates.map(n=>{
-  const a=averages[n];
-  return `<div class="candidate row"><span>${escapeHTML(n)} (${a.count} note(s))</span><strong class="score">${a.count?(a.total/a.count).toFixed(1):"—"}/20</strong></div>`;
- }).join("");
-}
-
-async function saveRating(table,candidate){
- const input=document.getElementById(table+"_"+encodeURIComponent(candidate));
- const score=Number(input.value);
- if(!Number.isInteger(score)||score<0||score>20)return alert("Entre une note entière de 0 à 20.");
- const {error}=await db.from(table).insert({candidate,score,user_id:currentUser.id});
- if(error){
-  if(error.code==="23505")alert("Tu as déjà noté ce candidat.");
-  else alert("Erreur : "+error.message);
-  return;
- }
- alert("Note enregistrée !");
- await refreshAll();
-}
-
-async function refreshAll(){
- try{
-  await loadVotes();
-  await loadRatingSection("evaluation_ratings",evaluationCandidates,"evaluationList","evaluationResults");
-  await loadRatingSection("ratings",primeCandidates,"primeList","primeResults");
- }catch(error){showMessage("Erreur de chargement : "+error.message,false);}
+async function signOut(){
+  await db.auth.signOut();
+  currentUser=null;
+  document.getElementById("app").classList.add("hidden");
+  document.getElementById("accountPanel").classList.add("hidden");
+  document.getElementById("authPanel").classList.remove("hidden");
+  message("Déconnexion effectuée.");
 }
 
 async function init(){
- const {data,error}=await db.auth.getSession();
- if(error){console.error(error);return;}
- if(data.session?.user)await startApp(data.session.user);
+  const {data,error}=await db.auth.getUser();
+  if(error || !data.user){message("Connecte-toi pour continuer.");return;}
+  currentUser=data.user;
+  isAdmin=(currentUser.email||"").toLowerCase()===ADMIN_EMAIL.toLowerCase();
+
+  document.getElementById("authPanel").classList.add("hidden");
+  document.getElementById("accountPanel").classList.remove("hidden");
+  document.getElementById("app").classList.remove("hidden");
+  document.getElementById("accountInfo").textContent="Connecté : "+currentUser.email;
+
+  await loadVotes();
+  buildRatingForms();
+  if(isAdmin) await loadAdminResults();
+  message("Bienvenue !");
 }
+
+async function loadVotes(){
+  const {data,error}=await db.from("votes").select("candidate,category,user_id");
+  if(error){message("Erreur de chargement des votes : "+error.message);return;}
+  userVotes=data||[];
+  renderPopularity();
+}
+
+function showTab(id,button){
+  document.querySelectorAll("#app > section").forEach(s=>s.classList.add("hidden"));
+  document.getElementById(id).classList.remove("hidden");
+  document.querySelectorAll(".tabs button").forEach(b=>b.classList.remove("active"));
+  button.classList.add("active");
+}
+
+function renderPopularity(){
+  renderGroup("boys",boys,"garçon");
+  renderGroup("girls",girls,"fille");
+}
+
+function renderGroup(containerId,list,category){
+  const container=document.getElementById(containerId);
+  const counts=list.map(name=>({
+    name,
+    count:userVotes.filter(v=>v.candidate===name && v.category===category).length
+  })).sort((a,b)=>b.count-a.count || a.name.localeCompare(b.name,"fr"));
+
+  container.innerHTML="";
+  counts.forEach((item,index)=>{
+    const alreadyVoted=userVotes.some(v=>v.user_id===currentUser.id && v.category===category);
+    const row=document.createElement("div");
+    row.className="person";
+    const left=document.createElement("div");
+    const rank=document.createElement("span");
+    rank.className="rank";
+    rank.textContent=(index+1)+"e  ";
+    left.appendChild(rank);
+    const name=document.createElement("strong");
+    name.textContent=item.name;
+    left.appendChild(name);
+
+    if(item.name==="Noémie"){
+      row.classList.add("immunised");
+      const tag=document.createElement("span");
+      tag.className="immune";
+      tag.textContent="IMMUNISÉE";
+      left.appendChild(document.createTextNode(" "));
+      left.appendChild(tag);
+    }
+    const sub=document.createElement("small");
+    sub.textContent=item.count+" vote(s)";
+    left.appendChild(sub);
+    row.appendChild(left);
+
+    if(!alreadyVoted){
+      const btn=document.createElement("button");
+      btn.textContent="Voter";
+      btn.onclick=()=>castVote(item.name,category);
+      row.appendChild(btn);
+    }else{
+      const tag=document.createElement("span");
+      tag.className="notice";
+      tag.textContent="Vote effectué";
+      row.appendChild(tag);
+    }
+    container.appendChild(row);
+  });
+
+  if(category==="garçon" || category==="fille"){
+    const excluded=category==="garçon"
+      ? [{name:"Antoine",rank:15,color:"red"},{name:"Elija",rank:16,color:"red"},{name:"Khalil",rank:17,color:"black"}]
+      : [];
+    excluded.forEach(person=>{
+      const row=document.createElement("div");
+      row.className="person";
+      const label=document.createElement("strong");
+      label.textContent=person.rank+"e — "+person.name;
+      label.className=person.color==="black"?"impossible black":"impossible";
+      const status=document.createElement("span");
+      status.className=person.color==="black"?"impossible black":"impossible";
+      status.textContent="Vote impossible";
+      row.append(label,status);
+      container.appendChild(row);
+    });
+  }
+}
+
+async function castVote(candidate,category){
+  if(userVotes.some(v=>v.user_id===currentUser.id && v.category===category)){
+    message("Tu as déjà voté dans cette catégorie.");return;
+  }
+  const {error}=await db.from("votes").insert({
+    candidate,category,user_id:currentUser.id
+  });
+  if(error){
+    message(error.code==="23505"?"Tu as déjà voté dans cette catégorie.":error.message);
+    return;
+  }
+  message("Vote enregistré !");
+  await loadVotes();
+}
+
+function buildRatingForms(){
+  makeRatingForm("evaluationForm",evaluationCandidates,"evaluation_ratings");
+  makeRatingForm("primeForm",primeCandidates,"ratings");
+}
+
+function makeRatingForm(containerId,candidates,table){
+  const container=document.getElementById(containerId);
+  container.innerHTML="";
+  candidates.forEach(candidate=>{
+    const row=document.createElement("div");
+    row.className="person";
+    const label=document.createElement("strong");
+    label.textContent=candidate;
+    const input=document.createElement("input");
+    input.type="number";
+    input.min="0";
+    input.max="20";
+    input.step="1";
+    input.placeholder="/20";
+    input.className="score";
+    input.id=table+"-"+candidate;
+    const btn=document.createElement("button");
+    btn.textContent="Envoyer";
+    btn.onclick=()=>submitRating(candidate,table,input);
+    row.append(label,input,btn);
+    container.appendChild(row);
+  });
+}
+
+async function submitRating(candidate,table,input){
+  const score=Number(input.value);
+  if(input.value==="" || !Number.isInteger(score) || score<0 || score>20){
+    message("Choisis une note entière entre 0 et 20.");return;
+  }
+  const {error}=await db.from(table).insert({
+    candidate,score,user_id:currentUser.id
+  });
+  if(error){
+    message(error.code==="23505"?"Tu as déjà noté ce candidat.":error.message);
+    return;
+  }
+  input.disabled=true;
+  message("Note enregistrée pour "+candidate+" !");
+}
+
+async function loadAdminResults(){
+  await showRatingResults("evaluation_ratings","evaluationResults","evaluationStats");
+  await showRatingResults("ratings","primeResults","primeStats");
+}
+
+async function showRatingResults(table,sectionId,statsId){
+  const {data,error}=await db.from(table).select("candidate,score");
+  if(error){
+    message("Impossible de charger les résultats : "+error.message);
+    return;
+  }
+  document.getElementById(sectionId).classList.remove("hidden");
+  const totals={};
+  (data||[]).forEach(row=>{
+    if(!totals[row.candidate])totals[row.candidate]=[];
+    totals[row.candidate].push(row.score);
+  });
+  const target=document.getElementById(statsId);
+  target.innerHTML="";
+  Object.keys(totals).sort((a,b)=>{
+    const avgA=totals[a].reduce((x,y)=>x+y,0)/totals[a].length;
+    const avgB=totals[b].reduce((x,y)=>x+y,0)/totals[b].length;
+    return avgB-avgA;
+  }).forEach(name=>{
+    const scores=totals[name];
+    const average=scores.reduce((a,b)=>a+b,0)/scores.length;
+    const line=document.createElement("p");
+    line.textContent=name+" : "+average.toFixed(2)+"/20 ("+scores.length+" note(s))";
+    target.appendChild(line);
+  });
+  if(!Object.keys(totals).length)target.textContent="Aucune note enregistrée pour le moment.";
+}
+
+db.auth.onAuthStateChange((event,session)=>{
+  if(event==="SIGNED_IN" && session && !currentUser){
+    init();
+  }
+});
+
 init();
 </script>
 </body>
+</html>
+
+
+
+

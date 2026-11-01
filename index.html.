@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Télé Réal’Stats</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#100d19;color:white;font-family:Arial,sans-serif}
+header{text-align:center;padding:25px 10px;background:linear-gradient(135deg,#21143c,#080711)}
+h1{margin:0;color:#f3c85b;font-size:30px}
+header p{color:#c9b9e8;margin-bottom:0}
+
+.tabs{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;padding:15px}
+.tab{background:#292239;color:white;border:1px solid #55456e;padding:12px;border-radius:10px;font-weight:bold}
+.tab.active{background:#e5b943;color:#17111f}
+
+main{max-width:850px;margin:auto;padding:10px}
+.panel{display:none}
+.panel.active{display:block}
+.subtitle{text-align:center;color:#d8c8ed}
+.week{text-align:center;color:#e8bd50;font-weight:bold;letter-spacing:2px}
+.message{text-align:center;color:#ddd;background:#211b2c;padding:15px;border-radius:10px}
+
+.person{
+  background:#211b2c;
+  border:2px solid #40334f;
+  border-radius:13px;
+  padding:15px;
+  margin:12px 0;
+}
+.person h3{margin:0 0 10px;color:white}
+.status{font-size:11px;color:#eee;margin-left:7px}
+.stats{color:white;margin:8px 0}
+.average{font-size:20px;color:white;font-weight:bold}
+.bar{height:9px;background:#493d59;border-radius:10px;overflow:hidden;margin:8px 0}
+.bar span{display:block;height:100%;background:#fff}
+
+button.vote{
+  background:white;
+  color:#17111f;
+  border:0;
+  border-radius:8px;
+  padding:10px 15px;
+  font-weight:bold;
+  cursor:pointer;
+}
+button.vote:disabled{background:#777;color:#ddd;cursor:not-allowed}
+select{background:#fff;color:#17111f;padding:9px;border-radius:8px;border:0}
+
+/* COULEURS POPULARITÉ */
+.person.pop-red{background:#8b2028;border-color:#ff5555}
+.person.pop-black{background:#050505;border-color:#555}
+.person.pop-yellow{background:#b58b08;border-color:#f5d442}
+.person.pop-blue{background:#123d78;border-color:#438bff}
+
+/* COULEURS NOTES DU PUBLIC */
+.person.note-red{background:#8b2028;border-color:#ff5555}
+.person.note-orange{background:#a84e0b;border-color:#ff9b36}
+.person.note-yellow{background:#b58b08;border-color:#f5d442}
+.person.note-green{background:#176b3a;border-color:#39d477}
+
+footer{text-align:center;color:#80768f;padding:25px;font-size:12px}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>⭐ Télé Réal’Stats ⭐</h1>
+  <p>Les statistiques de la télé-réalité</p>
+</header>
+
+<nav class="tabs">
+  <button class="tab active" data-panel="popularity">📊 Popularité</button>
+  <button class="tab" data-panel="nominations">🛑 Nominations</button>
+  <button class="tab" data-panel="top3">⭐ Top 3</button>
+  <button class="tab" data-panel="notes">✏️ Notes du Public</button>
+</nav>
+
+<main>
+
+<section id="popularity" class="panel active">
+  <p class="subtitle">Côte de popularité</p>
+  <p class="week">SEMAINE 4</p>
+  <div id="votes-list">
+    <p class="message">Chargement des votes...</p>
+  </div>
+</section>
+
+<section id="nominations" class="panel">
+  <p class="week">SEMAINE 4</p>
+  <p class="message">Les Évaluations n’ont pas encore été faites</p>
+  <div class="person">1 — NON DÉFINI</div>
+  <div class="person">2 — NON DÉFINI</div>
+  <div class="person">3 — NON DÉFINI</div>
+</section>
+
+<section id="top3" class="panel">
+  <p class="week">SEMAINE 4</p>
+  <p class="message">Les Évaluations n’ont pas encore été faites</p>
+</section>
+
+<section id="notes" class="panel">
+  <p class="subtitle">Attribue une note sur 20 à chaque académicien</p>
+  <p class="week">NOTES DU PUBLIC — PRIME 4</p>
+  <p class="message">
+    Une note par navigateur et par candidat. Les moyennes sont visibles par tous.
+  </p>
+  <div id="ratings-list">
+    <p class="message">Chargement des notes...</p>
+  </div>
+</section>
+
+</main>
+
+<footer>Télé Réal’Stats — Site non officiel</footer>
+
+<script>
+const SUPABASE_URL = "https://qdibctjpzozlpngvjsvc.supabase.co";
+const SUPABASE_KEY = "sb_publishable_X5SZIRRcg8wiInW1GQTvCw_eZKRPCmA";
+
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const candidates = [
+  {name:"Noémie", status:"IMMUNISÉE", canVote:true},
+  {name:"Maud", status:"EN COMPÉTITION", canVote:true},
+  {name:"Brieuc", status:"EN COMPÉTITION", canVote:true},
+  {name:"Leeloo", status:"EN COMPÉTITION", canVote:true},
+  {name:"Tracy", status:"EN COMPÉTITION", canVote:true},
+  {name:"Félix", status:"EN COMPÉTITION", canVote:true},
+  {name:"Morgan", status:"EN COMPÉTITION", canVote:true},
+  {name:"Cameron", status:"EN COMPÉTITION", canVote:true},
+  {name:"Amel", status:"EN COMPÉTITION", canVote:true},
+  {name:"Isabella", status:"EN COMPÉTITION", canVote:true},
+  {name:"Ydriss", status:"EN COMPÉTITION", canVote:true},
+  {name:"Melina", status:"EN COMPÉTITION", canVote:true},
+  {name:"Kylian", status:"EN COMPÉTITION", canVote:true},
+  {name:"Zoe", status:"EN COMPÉTITION", canVote:true},
+  {name:"Antoine", status:"ÉLIMINÉ", canVote:false},
+  {name:"Elija", status:"ÉLIMINÉ", canVote:false},
+  {name:"Khalil", status:"ABANDON", canVote:false}
+];
+
+const ratingCandidates = [
+  "Noémie",
+  "Kylian",
+  "Melina",
+  "Brieuc",
+  "Leeloo",
+  "Tracy",
+  "Félix",
+  "Morgan",
+  "Cameron",
+  "Amel",
+  "Isabella",
+  "Zoe",
+  "Maud",
+  "Ydriss",
+  "Antoine"
+];
+
+/* IDENTIFIANT DU NAVIGATEUR */
+const browserKey = "starAcademyRatingsBrowserId";
+let browserId = localStorage.getItem(browserKey);
+
+if (!browserId) {
+  browserId = window.crypto && typeof window.crypto.randomUUID === "function"
+    ? window.crypto.randomUUID()
+    : "browser-" + Date.now() + "-" + Math.random();
+
+  localStorage.setItem(browserKey, browserId);
+}
+
+function escapeHTML(value) {
+  return String(value).replace(/[&<>"']/g, c => ({
+    "&":"&amp;",
+    "<":"&lt;",
+    ">":"&gt;",
+    '"':"&quot;",
+    "'":"&#39;"
+  })[c]);
+}
+
+/* ONGLETS */
+document.querySelectorAll(".tab").forEach(button => {
+  button.addEventListener("click", () => {
+    document.querySelectorAll(".tab").forEach(b => b.classList.remove("active"));
+    document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+
+    button.classList.add("active");
+    document.getElementById(button.dataset.panel).classList.add("active");
+
+    if (button.dataset.panel === "notes") refreshRatings();
+    if (button.dataset.panel === "popularity") refreshVotes();
+  });
+});
+
+/* COULEURS POPULARITÉ */
+function popularityColor(name) {
+  if (name === "Elija" || name === "Antoine") return "pop-red";
+  if (name === "Khalil") return "pop-black";
+  if (name === "Noémie") return "pop-yellow";
+  return "pop-blue";
+}
+
+/* CHARGEMENT DES VOTES */
+let votesLoading = false;
+
+async function refreshVotes() {
+  const container = document.getElementById("votes-list");
+
+  if (votesLoading) return;
+  votesLoading = true;
+  container.innerHTML = '<p class="message">Chargement des votes...</p>';
+
+  let timeoutId;
+
+  try {
+    const request = db.from("votes").select("candidate");
+
+    const timeout = new Promise((_, reject) => {
+      timeoutId = setTimeout(
+        () => reject(new Error("Le serveur met trop de temps à répondre.")),
+        12000
+      );
+    });
+
+    const {data, error} = await Promise.race([request, timeout]);
+    if (error) throw error;
+
+    const counts = {};
+    candidates.filter(c => c.canVote).forEach(c => {
+      counts[c.name] = 0;
+    });
+
+    data.forEach(row => {
+      if (Object.prototype.hasOwnProperty.call(counts, row.candidate)) {
+        counts[row.candidate]++;
+      }
+    });
+
+    const total = Object.values(counts).reduce((a,b) => a+b, 0);
+
+    const sorted = candidates.slice().sort((a,b) => {
+      if (!a.canVote && !b.canVote) return 0;
+      if (!a.canVote) return 1;
+      if (!b.canVote) return -1;
+      return counts[b.name] - counts[a.name];
+    });
+
+    container.innerHTML = "";
+
+    sorted.forEach(c => {
+      const count = c.canVote ? counts[c.name] : 0;
+      const percent = c.canVote && total ? count / total * 100 : 0;
+
+      const div = document.createElement("div");
+      div.className = "person " + popularityColor(c.name);
+
+      div.innerHTML = `
+        <h3>${escapeHTML(c.name)}
+          <span class="status">${escapeHTML(c.status)}</span>
+        </h3>
+
+        ${c.canVote ? `
+          <div class="stats">
+            ${count} vote(s) — ${percent.toFixed(1)} %
+          </div>
+          <div class="bar">
+            <span style="width:${percent}%"></span>
+          </div>
+          <button class="vote" data-name="${escapeHTML(c.name)}">VOTER</button>
+        ` : `
+          <div class="stats">
+            ${c.name === "Antoine" ? "15e" : c.name === "Elija" ? "16e" : "17e"}
+          </div>
+          <button class="vote" disabled>VOTE IMPOSSIBLE</button>
+        `}
+      `;
+
+      container.appendChild(div);
+    });
+
+    container.querySelectorAll("button[data-name]").forEach(button => {
+      button.addEventListener("click", () => submitVote(button.dataset.name, button));
+    });
+
+  } catch (error) {
+    container.innerHTML = `
+      <p class="message">Impossible de charger les votes : ${escapeHTML(error.message)}</p>
+      <button class="vote" id="retry-votes">RÉESSAYER</button>
+    `;
+    document.getElementById("retry-votes").addEventListener("click", refreshVotes);
+
+  } finally {
+    clearTimeout(timeoutId);
+    votesLoading = false;
+  }
+}
+
+/* ENREGISTRER UN VOTE */
+async function submitVote(name, button) {
+  button.disabled = true;
+  button.textContent = "ENVOI...";
+
+  const {error} = await db.from("votes").insert({
+    candidate: name
+  });
+
+  if (error) {
+    alert("Erreur lors du vote : " + error.message);
+    button.disabled = false;
+    button.textContent = "VOTER";
+    return;
+  }
+
+  await refreshVotes();
+}
+
+/* COULEURS DES NOTES */
+function ratingColor(name) {
+  if (name === "Antoine") return "note-red";
+  if (name === "Maud" || name === "Ydriss") return "note-orange";
+  if (name === "Noémie") return "note-yellow";
+  if (name === "Melina" || name === "Kylian") return "note-green";
+  return "";
+}

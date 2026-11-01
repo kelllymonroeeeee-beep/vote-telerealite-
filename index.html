@@ -1,658 +1,440 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Télé Réal’Stats</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <style>
-* { box-sizing: border-box; }
-
-body {
-  margin: 0;
-  padding: 14px;
-  background: #10121b;
-  color: white;
-  font-family: Arial, sans-serif;
-}
-
-header { text-align: center; margin-bottom: 22px; }
-h1 { color: #f5c542; }
-h2 { text-align: center; }
-
-.panel {
-  max-width: 800px;
-  margin: 15px auto;
-  padding: 16px;
-  background: #1c2030;
-  border-radius: 14px;
-}
-
-input, select, button { font: inherit; }
-
-input {
-  display: block;
-  width: 100%;
-  padding: 14px;
-  margin: 10px 0;
-  border: 1px solid #777;
-  border-radius: 8px;
-  background: white !important;
-  color: #111 !important;
-  -webkit-text-fill-color: #111 !important;
-  caret-color: #111 !important;
-  font-size: 16px !important;
-}
-
-input::placeholder {
-  color: #666 !important;
-  -webkit-text-fill-color: #666 !important;
-}
-
-button {
-  border: 0;
-  border-radius: 8px;
-  padding: 12px 14px;
-  margin: 4px;
-  background: #f5c542;
-  color: #171717;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-button:disabled {
-  background: #777;
-  color: #ddd;
-}
-
-select {
-  padding: 10px;
-  border-radius: 8px;
-  background: white;
-  color: #111;
-  max-width: 100%;
-}
-
-.message {
-  color: #f5c542;
-  text-align: center;
-  overflow-wrap: anywhere;
-}
-
-.small { color: #aaa; font-size: 13px; }
-
-#site-area { display: none; }
-
-nav {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  max-width: 1000px;
-  margin: 15px auto;
-  gap: 5px;
-}
-
-nav button { flex: 1 1 145px; }
-
-.tab {
-  display: none;
-  max-width: 900px;
-  margin: auto;
-}
-
-.tab.active { display: block; }
-
-.candidate {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  padding: 12px;
-  margin: 9px 0;
-  border-radius: 10px;
-  background: #292e40;
-}
-
-.candidate-info { min-width: 0; }
-.candidate-info strong { display: block; }
-.status { font-size: 12px; margin-top: 5px; color: #ddd; }
-
-.pop-yellow, .rating-yellow { border-left: 6px solid #f5c542; }
-.pop-blue, .rating-blue { border-left: 6px solid #369bff; }
-.pop-red, .rating-red { border-left: 6px solid #e74c3c; }
-.pop-black { border-left: 6px solid #555; }
-.rating-green { border-left: 6px solid #27ae60; }
-.rating-orange { border-left: 6px solid #f39c12; }
-
-.rating-actions {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-}
-
-footer {
-  text-align: center;
-  color: #777;
-  padding: 25px 0;
-}
-
-@media(max-width: 480px) {
-  body { padding: 8px; }
-  .panel { padding: 11px; }
-  .candidate { padding: 9px; }
-  .candidate button { padding: 10px; }
-  nav button { flex-basis: 130px; }
-}
+*{box-sizing:border-box}
+body{margin:0;background:#10101c;color:#fff;font-family:Arial,sans-serif}
+header{text-align:center;padding:25px 12px;background:linear-gradient(135deg,#6825a5,#d33b8d)}
+h1{margin:0;font-size:29px}
+header p{margin:8px 0 0}
+main{max-width:900px;margin:auto;padding:16px}
+.card{background:#1d1d30;border:1px solid #34344c;border-radius:15px;padding:17px;margin:14px 0}
+input,select,button{font-size:16px;border-radius:9px;padding:12px;width:100%;margin:6px 0}
+input,select{background:#fff;color:#111;border:1px solid #aaa}
+button{border:0;background:#a83cce;color:white;font-weight:bold;cursor:pointer}
+button:disabled{opacity:.5;cursor:not-allowed}
+button.secondary{background:#393951}
+button.danger{background:#c52e4b}
+.tabs{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;margin:15px 0}
+.tabs button{font-size:13px;padding:12px 5px;margin:0}
+.tabs button.active{background:#e34c9a}
+.hidden{display:none!important}
+.muted{color:#b8b8cc;font-size:13px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.score{font-size:22px;font-weight:bold;color:#ffc85b}
+.candidate{padding:12px 0;border-bottom:1px solid #39394c}
+.candidate:last-child{border:0}
+#message{padding:10px;border-radius:8px;margin:10px 0}
+.good{background:#174c36}
+.bad{background:#642c37}
 </style>
 </head>
-
 <body>
 
 <header>
-  <h1>📺 TÉLÉ RÉAL’STATS</h1>
-  <p class="small">Les statistiques de l'aventure</p>
+  <h1>⭐ Télé Réal’Stats</h1>
+  <p>Les statistiques de la télé-réalité</p>
 </header>
 
-<section id="auth-area" class="panel">
-  <h2>Connexion</h2>
-  <p class="small">Connecte-toi ou crée ton compte pour participer.</p>
-
-  <input id="email" type="email" placeholder="Adresse e-mail" autocomplete="email">
-  <input id="password" type="password" placeholder="Mot de passe" autocomplete="current-password">
-
-  <button id="auth-submit" type="button">SE CONNECTER</button>
-  <button id="auth-switch" type="button">CRÉER UN COMPTE</button>
-
-  <p id="auth-message" class="message"></p>
-</section>
-
-<section id="site-area">
-
-  <div class="panel" style="text-align:center">
-    <span id="account-label"></span>
-    <button id="logout">DÉCONNEXION</button>
-  </div>
-
-  <nav>
-    <button data-tab="popularity">📊 Popularité</button>
-    <button data-tab="nominations">🛑 Nominations</button>
-    <button data-tab="top3">⭐ Top 3</button>
-    <button data-tab="evaluations">📝 Note des évaluations</button>
-    <button data-tab="prime">✏️ Note du prime</button>
-  </nav>
-
-  <section id="popularity" class="tab active">
-    <div class="panel">
-      <h2>📊 POPULARITÉ — SEMAINE 4</h2>
-      <p class="small">Un vote par compte pour un garçon et un vote par compte pour une fille.</p>
-      <p id="vote-message" class="message"></p>
-      <div id="popularity-list"></div>
-    </div>
+<main>
+  <section id="authCard" class="card">
+    <h2 id="authTitle">Connexion</h2>
+    <input id="email" type="email" placeholder="Adresse e-mail" autocomplete="email">
+    <input id="password" type="password" placeholder="Mot de passe" autocomplete="current-password">
+    <button id="authButton" onclick="authenticate()">Se connecter</button>
+    <button class="secondary" onclick="toggleAuth()">Créer un compte</button>
+    <p class="muted">La confirmation par e-mail doit être désactivée dans Supabase pour une inscription immédiate.</p>
   </section>
 
-  <section id="nominations" class="tab">
-    <div class="panel">
-      <h2>🛑 NOMINATIONS — SEMAINE 4</h2>
-      <div class="candidate"><strong>1 — NON DÉFINI</strong></div>
-      <div class="candidate"><strong>2 — NON DÉFINI</strong></div>
-      <div class="candidate"><strong>3 — NON DÉFINI</strong></div>
-      <p class="message">Les Évaluations n’ont pas encore été faites.</p>
+  <section id="app" class="hidden">
+    <div class="card">
+      <div class="row">
+        <div>
+          <strong>Compte connecté</strong>
+          <div id="userEmail" class="muted"></div>
+        </div>
+        <button class="secondary" style="width:auto" onclick="logout()">Déconnexion</button>
+      </div>
     </div>
-  </section>
 
-  <section id="top3" class="tab">
-    <div class="panel">
-      <h2>⭐ TOP 3 — SEMAINE 4</h2>
-      <p class="message">Les Évaluations n’ont pas encore été faites.</p>
+    <div id="message" class="hidden"></div>
+
+    <div id="adminPanel" class="card hidden">
+      <h2>🛠️ Administration</h2>
+      <p>Tu es connectée en tant qu'administratrice.</p>
+      <button class="danger" onclick="resetVotes()">Remettre tous les votes et notes à zéro</button>
+      <p class="muted">Cette action efface les votes et notes de tous les utilisateurs, sans supprimer leurs comptes.</p>
     </div>
+
+    <nav class="tabs">
+      <button class="active" onclick="showTab('popularite',this)">📊 Popularité</button>
+      <button onclick="showTab('nominations',this)">🛑 Nominations</button>
+      <button onclick="showTab('top3',this)">🏆 Top 3</button>
+      <button onclick="showTab('evaluations',this)">📝 Note des évaluations</button>
+      <button onclick="showTab('prime',this)">✏️ Note du prime</button>
+    </nav>
+
+    <section id="popularite" class="tab">
+      <div class="card">
+        <h2>📊 Vote de popularité</h2>
+        <p class="muted">Choisis une catégorie puis ton candidat préféré. Un vote par catégorie et par compte.</p>
+        <label>Catégorie</label>
+        <select id="voteCategory" onchange="updateCandidateChoices()">
+          <option value="garçon">Garçons</option>
+          <option value="fille">Filles</option>
+        </select>
+        <label>Candidat</label>
+        <select id="voteCandidate"></select>
+        <button onclick="castVote()">Valider mon vote</button>
+        <div id="voteStatus" class="muted"></div>
+      </div>
+      <div class="card">
+        <h2>Résultats de popularité</h2>
+        <div id="popularityResults">Chargement...</div>
+      </div>
+    </section>
+
+    <section id="nominations" class="tab hidden">
+      <div class="card">
+        <h2>🛑 Nominations</h2>
+        <p>Classement des candidats selon les votes de popularité.</p>
+        <div id="nominationResults"></div>
+      </div>
+    </section>
+
+    <section id="top3" class="tab hidden">
+      <div class="card">
+        <h2>🏆 Top 3</h2>
+        <div id="topResults"></div>
+      </div>
+    </section>
+
+    <section id="evaluations" class="tab hidden">
+      <div class="card">
+        <h2>📝 Note des évaluations</h2>
+        <p class="muted">Attribue une note sur 20 à chacun des 14 candidats. Une seule note par candidat et par compte.</p>
+        <div id="evaluationList"></div>
+      </div>
+      <div class="card">
+        <h2>Moyennes des évaluations</h2>
+        <div id="evaluationResults"></div>
+      </div>
+    </section>
+
+    <section id="prime" class="tab hidden">
+      <div class="card">
+        <h2>✏️ Note du prime</h2>
+        <p class="muted">Note chaque candidat sur 20. Une seule note par candidat et par compte.</p>
+        <div id="primeList"></div>
+      </div>
+      <div class="card">
+        <h2>Moyennes du prime</h2>
+        <div id="primeResults"></div>
+      </div>
+    </section>
   </section>
-
-  <section id="evaluations" class="tab">
-    <div class="panel">
-      <h2>📝 NOTE DES ÉVALUATIONS</h2>
-      <p class="small">Attribue une note sur 20 à chacun des 14 candidats. Une seule note par compte et par candidat.</p>
-      <p id="evaluation-message" class="message"></p>
-      <div id="evaluation-list"></div>
-    </div>
-  </section>
-
-  <section id="prime" class="tab">
-    <div class="panel">
-      <h2>✏️ NOTE DU PRIME — PRIME 4</h2>
-      <p class="small">Attribue une note sur 20 à chaque candidat.</p>
-      <p id="prime-message" class="message"></p>
-      <div id="prime-list"></div>
-    </div>
-  </section>
-
-</section>
-
-<footer>Télé Réal’Stats</footer>
+</main>
 
 <script>
 const SUPABASE_URL = "https://qdibctjpzozlpngvjsvc.supabase.co";
-const SUPABASE_KEY = "sb_publishable_X5SZIRRcg8wiInW1GQTvCw_eKZRPCmA";
+const SUPABASE_KEY = "sb_publishable_X5SZIRRcg8wiW1GQTvCw_eZKRPCmA";
+const ADMIN_EMAIL = "kelllymonroeeeee@gmail.com";
 
-let db = null;
-let currentUser = null;
-let creatingAccount = false;
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-const activeCandidates = [
-  {name:"Noémie", category:"fille", status:"IMMUNISÉE", style:"pop-yellow"},
-  {name:"Maud", category:"fille", status:"EN COMPÉTITION", style:"pop-blue"},
-  {name:"Brieuc", category:"garçon", status:"EN COMPÉTITION", style:"pop-blue"},
-  {name:"Leeloo", category:"fille", status:"EN COMPÉTITION", style:"pop-blue"},
-  {name:"Tracy", category:"fille", status:"EN COMPÉTITION", style:"pop-blue"},
-  {name:"Félix", category:"garçon", status:"EN COMPÉTITION", style:"pop-blue"},
-  {name:"Morgan", category:"garçon", status:"EN COMPÉTITION", style:"pop-blue"},
-  {name:"Cameron", category:"garçon", status:"EN COMPÉTITION", style:"pop-blue"},
-  {name:"Amel", category:"fille", status:"EN COMPÉTITION", style:"pop-blue"},
-  {name:"Isabella", category:"fille", status:"EN COMPÉTITION", style:"pop-blue"},
-  {name:"Ydriss", category:"garçon", status:"EN COMPÉTITION", style:"pop-blue"},
-  {name:"Melina", category:"fille", status:"EN COMPÉTITION", style:"pop-blue"},
-  {name:"Kylian", category:"garçon", status:"EN COMPÉTITION", style:"pop-blue"},
-  {name:"Zoe", category:"fille", status:"EN COMPÉTITION", style:"pop-blue"}
-];
+const boys = ["Brieuc","Félix","Morgan","Cameron","Ydriss","Kylian"];
+const girls = ["Noémie","Maud","Leeloo","Tracy","Amel","Isabella","Melina","Zoe"];
 
-const popularityCandidates = [
-  ...activeCandidates,
-  {name:"Antoine", category:"garçon", status:"ÉLIMINÉ", style:"pop-red", vote:false},
-  {name:"Elija", category:"garçon", status:"ÉLIMINÉ", style:"pop-red", vote:false},
-  {name:"Khalil", category:"garçon", status:"ABANDON", style:"pop-black", vote:false}
+const evaluationCandidates = [
+  "Noémie","Maud","Brieuc","Leeloo","Tracy","Félix","Morgan",
+  "Cameron","Amel","Isabella","Ydriss","Melina","Kylian","Zoe"
 ];
 
 const primeCandidates = [
-  {name:"Noémie", style:"rating-yellow"},
-  {name:"Kylian", style:"rating-green"},
-  {name:"Melina", style:"rating-green"},
-  {name:"Brieuc", style:"rating-blue"},
-  {name:"Leeloo", style:"rating-blue"},
-  {name:"Tracy", style:"rating-blue"},
-  {name:"Félix", style:"rating-blue"},
-  {name:"Morgan", style:"rating-blue"},
-  {name:"Cameron", style:"rating-blue"},
-  {name:"Amel", style:"rating-blue"},
-  {name:"Isabella", style:"rating-blue"},
-  {name:"Zoe", style:"rating-blue"},
-  {name:"Maud", style:"rating-orange"},
-  {name:"Ydriss", style:"rating-orange"},
-  {name:"Antoine", style:"rating-red"}
+  "Noémie","Kylian","Melina","Brieuc","Leeloo","Tracy","Félix",
+  "Morgan","Cameron","Amel","Isabella","Zoe","Maud","Ydriss","Antoine"
 ];
 
-function message(id, text) {
-  document.getElementById(id).textContent = text;
+let currentUser = null;
+let isSignup = false;
+let myVotes = [];
+let myEvaluationRatings = [];
+let myPrimeRatings = [];
+
+function showMessage(text, ok=true) {
+  const box = document.getElementById("message");
+  box.textContent = text;
+  box.className = ok ? "good" : "bad";
+  box.classList.remove("hidden");
 }
 
-function escapeHtml(value) {
-  return String(value).replace(/[&<>"']/g, char => ({
-    "&":"&amp;", "<":"&lt;", ">":"&gt;",
-    '"':"&quot;", "'":"&#39;"
-  }[char]));
+function toggleAuth() {
+  isSignup = !isSignup;
+  document.getElementById("authTitle").textContent = isSignup ? "Créer un compte" : "Connexion";
+  document.getElementById("authButton").textContent = isSignup ? "Créer mon compte" : "Se connecter";
 }
 
-function showLogin() {
-  currentUser = null;
-  document.getElementById("site-area").style.display = "none";
-  document.getElementById("auth-area").style.display = "block";
-}
-
-function showSite(user) {
-  currentUser = user;
-  document.getElementById("auth-area").style.display = "none";
-  document.getElementById("site-area").style.display = "block";
-  document.getElementById("account-label").textContent =
-    "Connecté : " + (user.email || "");
-
-  loadVotes();
-  loadEvaluationRatings();
-  loadPrimeRatings();
-}
-
-async function start() {
-  if (!window.supabase || !window.supabase.createClient) {
-    message("auth-message", "Erreur de chargement. Recharge la page.");
-    return;
-  }
-
-  db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-  const {data, error} = await db.auth.getSession();
-
-  if (error) {
-    message("auth-message", error.message);
-    return;
-  }
-
-  if (data.session) showSite(data.session.user);
-  else showLogin();
-
-  db.auth.onAuthStateChange((_event, session) => {
-    if (session) showSite(session.user);
-    else showLogin();
-  });
-}
-
-document.getElementById("auth-switch").addEventListener("click", () => {
-  creatingAccount = !creatingAccount;
-
-  document.getElementById("auth-submit").textContent =
-    creatingAccount ? "CRÉER MON COMPTE" : "SE CONNECTER";
-
-  document.getElementById("auth-switch").textContent =
-    creatingAccount ? "J’AI DÉJÀ UN COMPTE" : "CRÉER UN COMPTE";
-
-  document.getElementById("password").autocomplete =
-    creatingAccount ? "new-password" : "current-password";
-
-  message("auth-message", "");
-});
-
-document.getElementById("auth-submit").addEventListener("click", async () => {
-  if (!db) {
-    message("auth-message", "Service de connexion indisponible. Recharge la page.");
-    return;
-  }
-
+async function authenticate() {
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value;
-  const button = document.getElementById("auth-submit");
+  if (!email || !password) return alert("Entre ton e-mail et ton mot de passe.");
 
-  if (!email || !password) {
-    message("auth-message", "Entre ton e-mail et ton mot de passe.");
-    return;
-  }
-
-  if (password.length < 6) {
-    message("auth-message", "Le mot de passe doit contenir au moins 6 caractères.");
-    return;
-  }
-
+  const button = document.getElementById("authButton");
   button.disabled = true;
-  message("auth-message", "Connexion en cours...");
 
   try {
-    const result = creatingAccount
-      ? await db.auth.signUp({email, password})
-      : await db.auth.signInWithPassword({email, password});
-
-    if (result.error) {
-      message("auth-message", result.error.message);
-    } else if (creatingAccount) {
-      if (result.data.session && result.data.user) {
-        message("auth-message", "Compte créé ! Tu es connecté.");
-        showSite(result.data.user);
-      } else {
-        message("auth-message", "Aucune session reçue. Vérifie que Confirm email est désactivé dans Supabase.");
-      }
-    } else if (result.data.user) {
-      message("auth-message", "Connexion réussie !");
-      showSite(result.data.user);
+    let result;
+    if (isSignup) {
+      result = await db.auth.signUp({ email, password });
+    } else {
+      result = await db.auth.signInWithPassword({ email, password });
     }
+
+    if (result.error) throw result.error;
+
+    if (isSignup && !result.data.session) {
+      alert("Compte créé. Vérifie les paramètres de confirmation e-mail dans Supabase, puis connecte-toi.");
+      return;
+    }
+
+    await startApp(result.data.user);
   } catch (error) {
-    message("auth-message", "Erreur : " + error.message);
+    alert("Connexion impossible : " + error.message);
   } finally {
     button.disabled = false;
   }
-});
-
-document.getElementById("logout").addEventListener("click", async () => {
-  if (db) await db.auth.signOut();
-  showLogin();
-});
-
-document.querySelectorAll("nav button").forEach(button => {
-  button.addEventListener("click", () => {
-    document.querySelectorAll(".tab").forEach(tab =>
-      tab.classList.remove("active")
-    );
-    document.getElementById(button.dataset.tab).classList.add("active");
-  });
-});
-
-async function loadVotes() {
-  const list = document.getElementById("popularity-list");
-  list.innerHTML = "<p class='message'>Chargement...</p>";
-
-  const {data, error} = await db
-    .from("votes")
-    .select("candidate, category, user_id");
-
-  if (error) {
-    list.innerHTML = "<p class='message'>Erreur : " +
-      escapeHtml(error.message) + "</p>";
-    return;
-  }
-
-  const votes = data || [];
-  const counts = {};
-
-  votes.forEach(v => {
-    counts[v.candidate] = (counts[v.candidate] || 0) + 1;
-  });
-
-  const total = votes.length;
-  const userVotes = votes.filter(v => v.user_id === currentUser.id);
-
-  const alreadyVoted = {
-    garçon: userVotes.some(v => v.category === "garçon"),
-    fille: userVotes.some(v => v.category === "fille")
-  };
-
-  message("vote-message",
-    "Total : " + total +
-    " • Garçon : " + (alreadyVoted.garçon ? "déjà voté" : "disponible") +
-    " • Fille : " + (alreadyVoted.fille ? "déjà voté" : "disponible")
-  );
-
-  list.innerHTML = "";
-
-  popularityCandidates.forEach(candidate => {
-    const count = counts[candidate.name] || 0;
-    const percentage = total ? (count / total * 100).toFixed(1) : "0.0";
-    const canVote = candidate.vote !== false &&
-      !alreadyVoted[candidate.category];
-
-    const card = document.createElement("div");
-    card.className = "candidate " + candidate.style;
-
-    card.innerHTML = `
-      <div class="candidate-info">
-        <strong>${escapeHtml(candidate.name)}</strong>
-        <div class="status">${escapeHtml(candidate.status)}</div>
-        <div class="small">${count} vote(s) • ${percentage}%</div>
-      </div>
-      <div>
-        ${candidate.vote === false
-          ? "<span class='small'>Non votable</span>"
-          : `<button data-vote="${escapeHtml(candidate.name)}"
-              ${canVote ? "" : "disabled"}>
-              ${canVote ? "VOTER" : "DÉJÀ VOTÉ"}
-             </button>`}
-      </div>
-    `;
-
-    list.appendChild(card);
-  });
-
-  list.querySelectorAll("[data-vote]").forEach(button => {
-    button.addEventListener("click", () => castVote(button.dataset.vote));
-  });
 }
 
-async function castVote(name) {
-  const candidate = activeCandidates.find(c => c.name === name);
-  if (!candidate) return;
+async function logout() {
+  await db.auth.signOut();
+  currentUser = null;
+  document.getElementById("app").classList.add("hidden");
+  document.getElementById("authCard").classList.remove("hidden");
+}
 
-  const {data: existing, error: readError} = await db
-    .from("votes")
-    .select("id")
-    .eq("user_id", currentUser.id)
-    .eq("category", candidate.category);
+async function startApp(user) {
+  if (!user) return;
+  currentUser = user;
+  document.getElementById("authCard").classList.add("hidden");
+  document.getElementById("app").classList.remove("hidden");
+  document.getElementById("userEmail").textContent = user.email || "";
+  document.getElementById("adminPanel").classList.toggle(
+    "hidden",
+    (user.email || "").toLowerCase() !== ADMIN_EMAIL.toLowerCase()
+  );
 
-  if (readError) {
-    message("vote-message", readError.message);
+  updateCandidateChoices();
+  await refreshAll();
+}
+
+async function resetVotes() {
+  if ((currentUser?.email || "").toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
+    return alert("Accès administrateur refusé.");
+  }
+
+  const confirmed = confirm(
+    "ATTENTION : tous les votes et toutes les notes de tous les utilisateurs seront supprimés. Continuer ?"
+  );
+  if (!confirmed) return;
+
+  const secondConfirm = confirm("Dernière confirmation : cette suppression est définitive. Confirmer ?");
+  if (!secondConfirm) return;
+
+  const { error } = await db.rpc("reset_all_votes");
+  if (error) {
+    alert("La remise à zéro a échoué : " + error.message);
     return;
   }
 
-  if (existing && existing.length > 0) {
-    message("vote-message", "Tu as déjà voté dans cette catégorie.");
-    return;
-  }
+  alert("Tous les votes et les notes ont été remis à zéro !");
+  await refreshAll();
+}
 
-  const {error} = await db.from("votes").insert({
-    candidate: candidate.name,
-    category: candidate.category,
+function showTab(id, button) {
+  document.querySelectorAll(".tab").forEach(el => el.classList.add("hidden"));
+  document.getElementById(id).classList.remove("hidden");
+  document.querySelectorAll(".tabs button").forEach(el => el.classList.remove("active"));
+  button.classList.add("active");
+}
+
+function updateCandidateChoices() {
+  const category = document.getElementById("voteCategory").value;
+  const candidates = category === "garçon" ? boys : girls;
+  document.getElementById("voteCandidate").innerHTML =
+    candidates.map(name => `<option value="${escapeHTML(name)}">${escapeHTML(name)}</option>`).join("");
+}
+
+function escapeHTML(value) {
+  return String(value).replace(/[&<>"']/g, char => ({
+    "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;"
+  }[char]));
+}
+
+async function castVote() {
+  const category = document.getElementById("voteCategory").value;
+  const candidate = document.getElementById("voteCandidate").value;
+
+  const { error } = await db.from("votes").insert({
+    candidate,
+    category,
     user_id: currentUser.id
   });
 
   if (error) {
-    message("vote-message",
-      error.code === "23505"
-        ? "Tu as déjà voté dans cette catégorie."
-        : "Erreur : " + error.message);
+    if (error.code === "23505") {
+      alert("Tu as déjà voté dans cette catégorie. Tu ne peux voter qu'une fois.");
+    } else {
+      alert("Impossible d'enregistrer le vote : " + error.message);
+    }
     return;
   }
 
-  message("vote-message", "Ton vote a bien été enregistré !");
-  await loadVotes();
+  alert("Ton vote a bien été enregistré !");
+  await refreshAll();
 }
 
-/* NOTATION DES ÉVALUATIONS */
+async function loadVotes() {
+  const { data, error } = await db.from("votes").select("candidate, category, user_id");
+  if (error) throw error;
 
-async function loadEvaluationRatings() {
-  await loadRatingSection({
-    table: "evaluation_ratings",
-    candidates: activeCandidates,
-    listId: "evaluation-list",
-    messageId: "evaluation-message",
-    userField: "user_id"
-  });
-}
-
-/* NOTATION DU PRIME */
-
-async function loadPrimeRatings() {
-  await loadRatingSection({
-    table: "ratings",
-    candidates: primeCandidates,
-    listId: "prime-list",
-    messageId: "prime-message",
-    userField: "voter_id"
-  });
-}
-
-async function loadRatingSection(config) {
-  const list = document.getElementById(config.listId);
-  list.innerHTML = "<p class='message'>Chargement des notes...</p>";
-
-  const {data, error} = await db
-    .from(config.table)
-    .select("candidate, score, " + config.userField);
-
-  if (error) {
-    list.innerHTML = "<p class='message'>Erreur : " +
-      escapeHtml(error.message) + "</p>";
-    return;
-  }
-
-  const ratings = data || [];
-  list.innerHTML = "";
-
-  config.candidates.forEach(candidate => {
-    const ownRating = ratings.find(r =>
-      r.candidate === candidate.name &&
-      r[config.userField] === currentUser.id
-    );
-
-    const candidateRatings = ratings.filter(r =>
-      r.candidate === candidate.name
-    );
-
-    const average = candidateRatings.length
-      ? (
-          candidateRatings.reduce((sum, r) => sum + Number(r.score), 0) /
-          candidateRatings.length
-        ).toFixed(1)
-      : "—";
-
-    const options = Array.from({length:21}, (_, i) =>
-      `<option value="${i}" ${ownRating && Number(ownRating.score) === i ? "selected" : ""}>${i}/20</option>`
-    ).join("");
-
-    const card = document.createElement("div");
-    card.className = "candidate " + (candidate.style || "rating-blue");
-
-    card.innerHTML = `
-      <div class="candidate-info">
-        <strong>${escapeHtml(candidate.name)}</strong>
-        <div class="small">Moyenne : ${average}/20</div>
-      </div>
-      <div class="rating-actions">
-        <select data-rating="${escapeHtml(candidate.name)}"
-          ${ownRating ? "disabled" : ""}>
-          <option value="">Note</option>
-          ${options}
-        </select>
-        <button data-save-rating="${escapeHtml(candidate.name)}"
-          ${ownRating ? "disabled" : ""}>
-          ${ownRating ? "NOTÉ" : "VALIDER"}
-        </button>
-      </div>
-    `;
-
-    list.appendChild(card);
+  const results = {};
+  data.forEach(vote => {
+    const key = vote.category + "|" + vote.candidate;
+    results[key] = (results[key] || 0) + 1;
   });
 
-  list.querySelectorAll("[data-save-rating]").forEach(button => {
-    button.addEventListener("click", () => {
-      const name = button.dataset.saveRating;
-      const select = Array.from(
-        list.querySelectorAll("[data-rating]")
-      ).find(item => item.dataset.rating === name);
-
-      if (!select || select.value === "") {
-        message(config.messageId, "Choisis une note sur 20.");
-        return;
-      }
-
-      saveRating(config, name, Number(select.value));
-    });
-  });
-}
-
-async function saveRating(config, name, score) {
-  const userData = {
-    candidate: name,
-    score: score
+  const renderCategory = category => {
+    const names = category === "garçon" ? boys : girls;
+    return names.map(name => {
+      const count = results[category + "|" + name] || 0;
+      return `<div class="candidate row"><span>${escapeHTML(name)}</span><strong>${count} vote(s)</strong></div>`;
+    }).join("");
   };
 
-  userData[config.userField] = currentUser.id;
+  document.getElementById("popularityResults").innerHTML =
+    "<h3>Garçons</h3>" + renderCategory("garçon") +
+    "<h3>Filles</h3>" + renderCategory("fille");
 
-  const {error} = await db
-    .from(config.table)
-    .insert(userData);
+  const all = [...boys, ...girls].map(name => ({
+    name,
+    count: results[(boys.includes(name) ? "garçon" : "fille") + "|" + name] || 0
+  })).sort((a,b) => b.count - a.count);
+
+  document.getElementById("nominationResults").innerHTML =
+    all.map((item,i) => `<div class="candidate row"><span>${i+1}. ${escapeHTML(item.name)}</span><strong>${item.count} vote(s)</strong></div>`).join("");
+
+  document.getElementById("topResults").innerHTML =
+    all.slice(0,3).map((item,i) =>
+      `<div class="candidate row"><strong>${["🥇","🥈","🥉"][i]} ${escapeHTML(item.name)}</strong><span>${item.count} vote(s)</span></div>`
+    ).join("");
+}
+
+async function loadRatingSection(table, candidates, listId, resultsId, mineVariable) {
+  const { data, error } = await db.from(table).select("candidate, score, user_id");
+  if (error) throw error;
+
+  const mine = data.filter(row => row.user_id === currentUser.id);
+  if (table === "evaluation_ratings") myEvaluationRatings = mine;
+  else myPrimeRatings = mine;
+
+  const averages = {};
+  candidates.forEach(name => averages[name] = { total: 0, count: 0 });
+
+  data.forEach(row => {
+    if (!averages[row.candidate]) return;
+    averages[row.candidate].total += row.score;
+    averages[row.candidate].count++;
+  });
+
+  document.getElementById(listId).innerHTML = candidates.map(name => {
+    const alreadyRated = mine.some(row => row.candidate === name);
+    const existing = mine.find(row => row.candidate === name);
+    return `
+      <div class="candidate">
+        <div class="row">
+          <strong>${escapeHTML(name)}</strong>
+          ${alreadyRated ? `<span class="muted">Ta note : ${existing.score}/20</span>` : ""}
+        </div>
+        ${alreadyRated ? "" : `
+          <div class="row">
+            <input type="number" min="0" max="20" step="1"
+              id="${table}_${encodeURIComponent(name)}"
+              placeholder="Note sur 20" style="width:65%">
+            <button style="width:35%" onclick="saveRating('${table}','${escapeHTML(name)}')">Noter</button>
+          </div>
+        `}
+      </div>`;
+  }).join("");
+
+  document.getElementById(resultsId).innerHTML = candidates.map(name => {
+    const item = averages[name];
+    const average = item.count ? (item.total / item.count).toFixed(1) : "—";
+    return `<div class="candidate row"><span>${escapeHTML(name)} <span class="muted">(${item.count} note(s))</span></span><strong class="score">${average}/20</strong></div>`;
+  }).join("");
+}
+
+async function saveRating(table, candidate) {
+  const input = document.getElementById(table + "_" + encodeURIComponent(candidate));
+  const score = Number(input.value);
+
+  if (!Number.isInteger(score) || score < 0 || score > 20) {
+    return alert("Entre une note entière entre 0 et 20.");
+  }
+
+  const { error } = await db.from(table).insert({
+    candidate,
+    score,
+    user_id: currentUser.id
+  });
 
   if (error) {
-    message(config.messageId,
-      error.code === "23505"
-        ? "Tu as déjà noté ce candidat."
-        : "Erreur : " + error.message);
+    if (error.code === "23505") alert("Tu as déjà noté ce candidat.");
+    else alert("Erreur : " + error.message);
     return;
   }
 
-  message(config.messageId, "Ta note a été enregistrée !");
-  if (config.table === "evaluation_ratings") {
-    await loadEvaluationRatings();
-  } else {
-    await loadPrimeRatings();
+  alert("Note enregistrée !");
+  await refreshAll();
+}
+
+async function refreshAll() {
+  try {
+    await loadVotes();
+    await loadRatingSection(
+      "evaluation_ratings", evaluationCandidates,
+      "evaluationList", "evaluationResults", "myEvaluationRatings"
+    );
+    await loadRatingSection(
+      "ratings", primeCandidates,
+      "primeList", "primeResults", "myPrimeRatings"
+    );
+  } catch (error) {
+    showMessage("Erreur de chargement : " + error.message, false);
   }
 }
 
-start();
-</script>
+async function init() {
+  const { data, error } = await db.auth.getSession();
+  if (error) {
+    console.error(error);
+    return;
+  }
+  if (data.session?.user) await startApp(data.session.user);
+}
 
+db.auth.onAuthStateChange((event, session) => {
+  if (event === "SIGNED_IN" && session?.user && !currentUser) {
+    startApp(session.user);
+  }
+});
+
+init();
+</script>
 </body>
 </html>
+

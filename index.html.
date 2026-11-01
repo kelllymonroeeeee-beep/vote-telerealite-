@@ -1,0 +1,240 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Star Academy 2026 - Votes</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 24px 14px;
+  background: #101018;
+  color: white;
+  font-family: Arial, sans-serif;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+h1 {
+  color: #f4d34f;
+  font-size: 30px;
+  margin-bottom: 8px;
+}
+
+header p {
+  color: #aaa;
+}
+
+.container {
+  max-width: 600px;
+  margin: auto;
+}
+
+.candidate {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #1d1d29;
+  border: 1px solid #30303e;
+  border-radius: 14px;
+  padding: 13px;
+  margin-bottom: 10px;
+}
+
+.rank {
+  width: 30px;
+  color: #aaa;
+  font-weight: bold;
+  text-align: center;
+}
+
+.name {
+  flex: 1;
+  font-weight: bold;
+}
+
+.vote {
+  border: 0;
+  border-radius: 20px;
+  padding: 10px 15px;
+  font-weight: bold;
+  cursor: pointer;
+  background: #8ee5ff;
+  color: #10202a;
+}
+
+.count {
+  color: #aaa;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+/* NOÉMIE */
+.first {
+  border: 1px solid #e8c34b;
+  background: #292516;
+}
+
+.first .name {
+  color: #f4d34f;
+}
+
+.first .vote {
+  background: #f4d34f;
+  color: #171717;
+}
+
+.special {
+  color: #f4d34f;
+  font-size: 10px;
+  margin-left: 6px;
+}
+
+/* ANTOINE ET ELIJA */
+.eliminated .name {
+  color: #999;
+}
+
+.eliminated .vote {
+  background: #d94343;
+  color: white;
+}
+
+.elimination-tag {
+  color: #ff5555;
+  font-size: 10px;
+  margin-left: 6px;
+}
+
+/* KHALIL */
+.abandon .name {
+  color: #999;
+}
+
+.abandon .vote {
+  background: #000;
+  color: white;
+}
+
+.abandon-tag {
+  color: #fff;
+  background: #000;
+  font-size: 10px;
+  padding: 4px 6px;
+  border-radius: 5px;
+  margin-left: 6px;
+}
+
+footer {
+  text-align: center;
+  color: #777;
+  font-size: 12px;
+  margin: 25px 0;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>⭐ STAR ACADEMY ⭐</h1>
+  <p>SAISON 2026 — 2027</p>
+  <p>Vote pour ton candidat préféré !</p>
+</header>
+
+<main class="container" id="ranking"></main>
+
+<footer>
+  Classement des votes • Star Academy
+</footer>
+
+<script>
+const candidates = [
+  { name: "Noémie", status: "immune" },
+  { name: "Amel" },
+  { name: "Zoé" },
+  { name: "Isabella" },
+  { name: "Maud" },
+  { name: "Mélina" },
+  { name: "Tracy" },
+  { name: "Leeloo" },
+  { name: "Morgan" },
+  { name: "Cameron" },
+  { name: "Brieuc" },
+  { name: "Ydriss" },
+  { name: "Félix" },
+  { name: "Kylian" },
+  { name: "Antoine", status: "eliminated" },
+  { name: "Elija", status: "eliminated" },
+  { name: "Khalil", status: "abandon" }
+];
+
+const votes = {};
+candidates.forEach(candidate => {
+  votes[candidate.name] = 0;
+});
+
+function displayRanking() {
+  const ranking = document.getElementById("ranking");
+  ranking.innerHTML = "";
+
+  candidates.forEach((candidate, index) => {
+    const card = document.createElement("div");
+    card.className = "candidate";
+
+    if (candidate.status === "immune") {
+      card.classList.add("first");
+    }
+
+    if (candidate.status === "eliminated") {
+      card.classList.add("eliminated");
+    }
+
+    if (candidate.status === "abandon") {
+      card.classList.add("abandon");
+    }
+
+    let label = "";
+
+    if (candidate.status === "immune") {
+      label = '<span class="special">IMMUNISÉE</span>';
+    } else if (candidate.status === "eliminated") {
+      label = '<span class="elimination-tag">ÉLIMINER</span>';
+    } else if (candidate.status === "abandon") {
+      label = '<span class="abandon-tag">ABANDON</span>';
+    }
+
+    card.innerHTML = `
+      <div class="rank">${index + 1}</div>
+      <div class="name">
+        ${candidate.name} ${label}
+        <div class="count">${votes[candidate.name]} vote(s)</div>
+      </div>
+      <button class="vote" type="button">VOTER</button>
+    `;
+
+    const button = card.querySelector("button");
+
+    button.addEventListener("click", () => {
+      votes[candidate.name]++;
+      displayRanking();
+    });
+
+    ranking.appendChild(card);
+  });
+}
+
+displayRanking();
+</script>
+
+</body>
+</html>
